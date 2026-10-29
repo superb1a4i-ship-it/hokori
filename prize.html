@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="zh-Hant"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="分獎">
+<link rel="apple-touch-icon" href="icon-180.png">
+<title>分獎</title>
+<style>
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html,body{margin:0;height:100%;background:#faf8f5;color:#2a2622;font-family:-apple-system,"PingFang TC","Hiragino Sans",sans-serif;-webkit-text-size-adjust:100%}
+header{position:fixed;top:0;left:0;right:0;z-index:5;background:#faf8f5;border-bottom:1px solid #e8e2da;padding:calc(env(safe-area-inset-top) + 8px) 12px 8px}
+.hr{display:flex;gap:8px;align-items:center}
+.hr+.hr{margin-top:8px}
+header select{flex:1;min-width:0;font-size:16px;padding:8px;border:1px solid #d8cfc4;border-radius:10px;background:#fff}
+header .ver{font-size:11px;color:#a0958a;white-space:nowrap}
+.tab{flex:1;height:42px;padding:0}
+.tab.on{background:#7a5c43;color:#fff;border-color:#7a5c43}
+#sync{font-size:12px;color:#b8641b;text-align:center;margin-top:4px;display:none}
+button{font:inherit;border:1px solid #d8cfc4;background:#fff;border-radius:12px;padding:10px 12px;font-size:16px;color:#2a2622}
+button:active{background:#f0ebe4}
+button:disabled{opacity:.45}
+button.main{background:#7a5c43;color:#fff;border-color:#7a5c43}
+#list{position:fixed;left:0;right:0;bottom:0;overflow-y:auto;-webkit-overflow-scrolling:touch}
+#list.snap{scroll-snap-type:y mandatory}
+.card{position:relative;scroll-snap-align:start;scroll-snap-stop:always;min-height:var(--h,100vh);padding:12px 14px 24px;border-bottom:6px solid #eee6dc;display:flex;flex-direction:column;gap:10px}
+.x{position:absolute;top:8px;right:10px;width:44px;height:44px;border-radius:22px;padding:0;font-size:20px;color:#c0392b;border-color:#e8c4bf;background:#fff}
+.x.sure{width:auto;padding:0 14px;background:#c0392b;color:#fff;border-color:#c0392b;font-size:15px;font-weight:700}
+.top{display:flex;align-items:baseline;gap:8px;flex-wrap:wrap;padding-right:56px}
+.no{font-size:14px;color:#a0958a}
+.nm{font-size:24px;font-weight:700;word-break:break-all}
+.sub{font-size:14px;color:#7a7066}
+.take{font-size:26px;font-weight:800;color:#b5482a;background:#fff3ee;border:2px solid #f0c5b6;border-radius:14px;padding:8px 12px}
+.take.none{font-size:16px;font-weight:500;color:#7a7066;background:#f5f2ee;border-color:#e8e2da}
+.ord{width:100%;border-radius:12px;border:1px solid #e8e2da;background:#fff;min-height:120px;object-fit:contain;max-height:40vh}
+.noimg{padding:30px;text-align:center;color:#a0958a;border:1px dashed #d8cfc4;border-radius:12px}
+.shots{display:flex;gap:8px;flex-wrap:wrap}
+.shot{position:relative;width:88px;height:88px}
+.shot img{width:100%;height:100%;object-fit:cover;border-radius:10px;border:1px solid #d8cfc4}
+.shot b{position:absolute;top:-6px;right:-6px;width:26px;height:26px;border-radius:13px;background:#c0392b;color:#fff;font-size:15px;line-height:26px;text-align:center}
+.btns{display:flex;gap:8px}
+.btns button{flex:1;height:50px}
+.done{font-size:14px;color:#2f6b3a}
+.gone{color:#c00;font-size:14px}
+.rx{font-size:13px;color:#b8641b}
+.empty{padding:40px 20px;text-align:center;color:#7a7066}
+.hint{font-size:13px;color:#a0958a;text-align:center;padding:10px}
+.row{position:relative;padding:12px 14px;border-bottom:1px solid #eee6dc;background:#fff}
+.row .top{padding-right:56px}
+.row .nm{font-size:20px}
+.mini{display:flex;gap:6px;margin:8px 0;overflow-x:auto}
+.mini img{width:56px;height:56px;object-fit:cover;border-radius:8px;border:1px solid #d8cfc4;flex:none}
+.row .btns button{height:46px}
+.row .x{top:10px}
+details{margin:10px 0}
+summary{padding:12px 14px;font-size:16px;color:#7a7066;background:#f5f2ee;list-style:none}
+summary::-webkit-details-marker{display:none}
+.ordrow{display:flex;align-items:center;gap:6px;padding:8px 12px;border-bottom:1px solid #eee6dc;background:#fff}
+.ordrow .n{width:30px;text-align:center;font-weight:700;color:#7a5c43}
+.ordrow .nmx{flex:1;min-width:0;font-size:17px;word-break:break-all}
+.ordrow button{height:42px;min-width:44px;padding:0 10px}
+.add{margin:12px;width:calc(100% - 24px);height:50px}
+#toast{position:fixed;left:50%;bottom:calc(env(safe-area-inset-bottom) + 24px);transform:translateX(-50%);background:#2a2622;color:#fff;padding:10px 16px;border-radius:20px;font-size:15px;opacity:0;transition:opacity .2s;z-index:9;pointer-events:none;max-width:90%;text-align:center}
+#toast.on{opacity:.92}
+#big{position:fixed;inset:0;background:#000;z-index:8;display:none;align-items:center;justify-content:center}
+#big img{max-width:100%;max-height:100%}
+</style></head><body>
+<header>
+<div class="hr"><select id="sel"></select><button id="re" aria-label="重新讀取">🔄</button><span class="ver" id="ver"></span></div>
+<div class="hr"><button class="tab" data-mode="cam">📷 拍照</button><button class="tab" data-mode="share">📤 分享</button><button class="tab" data-mode="ord">↕ 順序</button></div>
+<div id="sync"></div>
+</header>
+<div id="list"><div class="empty">讀取中…</div></div>
+<div id="toast"></div>
+<div id="big"><img alt=""></div>
+<input type="file" id="cam" accept="image/*" capture="environment" style="display:none">
+<script>
+(function(){
+var V='分獎 v1.1';
+var TEST=/[?&]t=1/.test(location.search);
+var API=TEST?'https:\/\/script.google.com/macros/s/AKfycbygGbeKAk3etQFnk4Y6DoOULoOqVPF6q0Ct8mrrLlsaXZkvcOYFWjQP76Aqf2KIUC7mow/exec':'https:\/\/script.google.com/macros/s/AKfycbwbCxq0ZAKj0Gcgb1guRp7CB_xROFBnZfk0gfd4Bpd43muHsmx7HSk5dPLHwlqWxqXrqA/exec';
+var KEYN=TEST?'hokoriKeyTest':'hokoriKey',P=TEST?'hokoriPrizeT':'hokoriPrize';
+var $=function(id){return document.getElementById(id)};
+$('ver').textContent=(TEST?'【測試】':'')+V;
+function key(){try{return localStorage.getItem(KEYN)||''}catch(e){return ''}}
+function ask(msg){var k=window.prompt((msg||'')+'請輸入通行碼（只要輸入一次，會記在這支手機）','');if(k){try{localStorage.setItem(KEYN,k.trim())}catch(e){}location.reload()}}
+function call(fn,args){return fetch(API,{method:'POST',body:JSON.stringify({k:key(),fn:fn,args:args||[]})}).then(function(r){return r.json()}).then(function(j){if(j.code===401){ask('通行碼不對。');throw new Error('通行碼不對')}if(j.err)throw new Error(j.err);return j.r})}
+function esc(s){return String(s==null?'':s).replace(/[&<>"']/g,function(c){return {'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]})}
+function toast(t){var d=$('toast');d.textContent=t;d.classList.add('on');clearTimeout(d._t);d._t=setTimeout(function(){d.classList.remove('on')},1800)}
+function PH(id,n){return 'https:\/\/lh3.googleusercontent.com/d/'+encodeURIComponent(id)+'=w'+n}
+function lsGet(k,d){try{var v=localStorage.getItem(k);return v?JSON.parse(v):d}catch(e){return d}}
+function lsSet(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+
+var MEM={},DB=null;
+function db(){if(DB)return DB;DB=new Promise(function(ok,ng){var r=indexedDB.open('hokoriPrize',1);r.onupgradeneeded=function(){r.result.createObjectStore('p')};r.onsuccess=function(){ok(r.result)};r.onerror=function(){ng(r.error)}});return DB}
+function dbGet(k){return db().then(function(d){return new Promise(function(ok){var q=d.transaction('p').objectStore('p').get(k);q.onsuccess=function(){ok(q.result||[])};q.onerror=function(){ok([])}})}).catch(function(){return MEM[k]||[]})}
+function dbSet(k,v){MEM[k]=v;return db().then(function(d){return new Promise(function(ok){var t=d.transaction('p','readwrite');t.objectStore('p').put(v,k);t.oncomplete=ok;t.onerror=ok})}).catch(function(){})}
+
+var D=null,SET=lsGet(P+'Set',''),MODE=lsGet(P+'Mode','cam'),SHOTS={},SENT=lsGet('hokoriPrizeSent',{}),PREV=lsGet(P+'Prev',{}),CUR=null,ARM=null;
+var OPS=lsGet(P+'Ops',[]),BUSY=false;
+function nameOf(c){return c.nick||c.cust||'（沒有名字）'}
+function takeText(c){var m={},o=[];(c.picks||[]).forEach(function(p){if(!(p in m)){m[p]=0;o.push(p)}m[p]++});return o.map(function(p){return p+'×'+m[p]}).join('　')}
+function sk(c){return SET+'|'+c.k}
+function inSet(){if(!D)return[];return D.cust.map(function(c,i){c._i=i;return c}).filter(function(c){return c.set===SET}).sort(function(a,b){return ((a.ord||0)-(b.ord||0))||(a._i-b._i)})}
+function people(){return inSet().filter(function(c){return c.st!=='已取消'})}
+function cancelled(){return inSet().filter(function(c){return c.st==='已取消'})}
+function findC(k){return (D?D.cust:[]).filter(function(c){return c.set===SET&&c.k===k})[0]}
+
+function showSync(){var n=OPS.length,s=$('sync');s.style.display=n?'block':'none';s.textContent=n?'⏳ 還有 '+n+' 個改動在送到雲端…（關掉也不會不見）':''}
+function push(fn,args){OPS.push({fn:fn,args:args});lsSet(P+'Ops',OPS);showSync();flush()}
+function flush(){
+  if(BUSY||!OPS.length)return;BUSY=true;var o=OPS[0];
+  call(o.fn,o.args).then(function(){OPS.shift();lsSet(P+'Ops',OPS);BUSY=false;showSync();if(OPS.length)flush();else saveD()})
+  .catch(function(e){BUSY=false;showSync();toast('雲端暫時沒回應，等一下會自己再送');setTimeout(flush,8000)});
+}
+function saveD(){try{localStorage.setItem(P+'D',JSON.stringify(D))}catch(e){}}
+function patch(c,o){Object.keys(o).forEach(function(k){c[k]=o[k]});saveD();push('抽賞_改客人',[c.k,JSON.stringify(o)])}
+
+function fillSel(){
+  var sets=D.sets.slice().sort(function(a,b){return (b.on?1:0)-(a.on?1:0)||((b.found||'')<(a.found||'')?-1:1)});
+  if(!sets.some(function(s){return s.id===SET}))SET=(sets[0]||{}).id||'';
+  $('sel').innerHTML=sets.map(function(s){return '<option value="'+esc(s.id)+'"'+(s.id===SET?' selected':'')+'>'+(s.on?'● ':'')+esc(s.title)+'</option>'}).join('');
+}
+function xBtn(c){return '<button class="x'+(ARM===c.k?' sure':'')+'" data-x="'+esc(c.k)+'" aria-label="刪掉這位">'+(ARM===c.k?'確定刪掉？':'✕')+'</button>'}
+function headInfo(c,i,n){return '<div class="top"><span class="no">'+(i+1)+' / '+n+'</span><span class="nm">'+esc(nameOf(c))+'</span><span class="sub">'+(c.cnt||'?')+' 抽'+(c.st==='已抽完'?'・已抽完':'')+'</span></div>'
+  +(c.cust&&c.cust!==c.nick?'<div class="sub">客人：'+esc(c.cust)+'</div>':'')
+  +(c.gone?'<div class="gone">⚠ 這則留言已被刪除</div>':'')}
+function cancelBlock(){var cs=cancelled();if(!cs.length)return '';return '<details><summary>🗑 已刪掉（'+cs.length+' 位）・點開可以拿回來</summary>'+cs.map(function(c){return '<div class="ordrow"><span class="nmx">'+esc(nameOf(c))+'　'+(c.cnt||'?')+' 抽</span><button data-back="'+esc(c.k)+'">拿回來</button></div>'}).join('')+'</details>'}
+function shotsOf(c){return SHOTS[sk(c)]||[]}
+
+function render(){
+  var ps=people(),L=$('list');
+  document.querySelectorAll('.tab').forEach(function(b){b.classList.toggle('on',b.dataset.mode===MODE)});
+  L.classList.toggle('snap',MODE==='cam');
+  Promise.all(ps.map(function(c){return dbGet(sk(c)).then(function(a){SHOTS[sk(c)]=a})})).then(function(){
+    var h='';
+    if(!ps.length)h='<div class="empty">這一套還沒有客人。</div>';
+    else if(MODE==='cam'){
+      h=ps.map(function(c,i){
+        var t=takeText(c),a=shotsOf(c);
+        return '<div class="card" data-k="'+esc(c.k)+'">'+xBtn(c)+headInfo(c,i,ps.length)
+          +(c.re?'<div class="rx">🙋 '+esc(c.re)+' 按過表情</div>':'')
+          +'<div class="take'+(t?'':' none')+'">'+(t?'要拿：'+esc(t):'還沒記抽到什麼（看下面的順序圖）')+'</div>'
+          +(c.img?'<img class="ord" loading="lazy" src="'+PH(c.img,1000)+'" data-big="'+esc(c.img)+'" alt="順序圖">':'<div class="noimg">沒有順序圖</div>')
+          +'<div class="shots">'+a.map(function(b,j){return '<div class="shot"><img src="'+URL.createObjectURL(b)+'" data-sv="1" alt=""><b data-del="'+j+'">✕</b></div>'}).join('')+'</div>'
+          +'<div class="btns"><button class="main" data-cam="1">📷 拍照'+(a.length?'（已 '+a.length+' 張）':'')+'</button></div>'
+          +(SENT[sk(c)]?'<div class="done">✓ 已分享過（'+esc(SENT[sk(c)])+'）</div>':'')
+          +'</div>';
+      }).join('')+'<div class="hint">最後一位了。拍完到上面「📤 分享」一位一位分享。</div>'+cancelBlock();
+    }else if(MODE==='share'){
+      var todo=ps.filter(function(c){return !SENT[sk(c)]}),sent=ps.filter(function(c){return SENT[sk(c)]});
+      var row=function(c,i){var a=shotsOf(c),t=takeText(c);
+        return '<div class="row" data-k="'+esc(c.k)+'">'+xBtn(c)+'<div class="top"><span class="nm">'+esc(nameOf(c))+'</span><span class="sub">'+(t?esc(t):(c.cnt||'?')+' 抽')+'</span></div>'
+          +(a.length?'<div class="mini">'+a.map(function(b){return '<img src="'+URL.createObjectURL(b)+'" data-sv="1" alt="">'}).join('')+'</div>':'<div class="sub" style="margin:8px 0">還沒拍照</div>')
+          +'<div class="btns"><button class="main" data-share="1"'+(a.length?'':' disabled')+'>📤 分享'+(a.length?' '+a.length+' 張':'')+'</button><button data-copy="1">📋 @名字</button></div>'
+          +(SENT[sk(c)]?'<div class="btns" style="margin-top:6px"><button data-unsent="1" style="height:38px;font-size:14px">改回沒分享</button></div>':'')+'</div>'};
+      h=(todo.length?todo.map(row).join(''):'<div class="empty">全部都分享完了 🎉</div>')
+        +(sent.length?'<details><summary>✓ 已分享（'+sent.length+' 位）</summary>'+sent.map(row).join('')+'</details>':'')+cancelBlock();
+    }else{
+      h='<button class="add main" data-add="1">＋ 加一位客人（中間補的）</button>'
+        +ps.map(function(c,i){return '<div class="ordrow" data-k="'+esc(c.k)+'"><span class="n">'+(i+1)+'</span><span class="nmx">'+esc(nameOf(c))+'　<small>'+(c.cnt||'?')+' 抽</small></span><button data-up="1"'+(i?'':' disabled')+'>⬆</button><button data-dn="1"'+(i<ps.length-1?'':' disabled')+'>⬇</button><button data-mv="1">移到…</button></div>'}).join('')
+        +'<div class="hint">這裡排的順序，拍照、分享都照這個順序。</div>'+cancelBlock();
+    }
+    L.innerHTML=h;
+    var y=lsGet(P+'Y',{})[SET+MODE];L.scrollTop=y||0;
+  });
+}
+function layout(){$('list').style.top=document.querySelector('header').offsetHeight+'px';document.documentElement.style.setProperty('--h',$('list').clientHeight+'px')}
+function load(){
+  if(!key()){ask('');return}
+  if(!D){var old=lsGet(P+'D',null);if(old){D=old;fillSel();render()}else $('list').innerHTML='<div class="empty">讀取中…</div>'}
+  $('re').textContent='⏳';
+  call('抽賞_讀取').then(function(j){$('re').textContent='🔄';if(OPS.length)return;D=JSON.parse(j);saveD();fillSel();render()})
+  .catch(function(e){$('re').textContent='🔄';if(D){toast('更新失敗，先顯示上次的');return}$('list').innerHTML='<div class="empty">讀不到資料：'+esc(e.message||e)+'<br><br>按右上 🔄 再試一次</div>'});
+}
+function renumber(arr){arr.forEach(function(c,i){if(c.ord!==i+1)patch(c,{ord:i+1})});render()}
+
+function stamp(file,name){
+  return new Promise(function(ok,ng){
+    var u=URL.createObjectURL(file),im=new Image();
+    im.onload=function(){
+      var W=im.naturalWidth,H=im.naturalHeight,s=Math.min(1,2000/Math.max(W,H));W=Math.round(W*s);H=Math.round(H*s);
+      var cv=document.createElement('canvas');cv.width=W;cv.height=H;var g=cv.getContext('2d');g.drawImage(im,0,0,W,H);
+      var fs=Math.round(Math.max(28,Math.min(W,H)*0.08));g.font='bold '+fs+'px -apple-system,"PingFang TC",sans-serif';
+      var tw=g.measureText(name).width,pad=Math.round(fs*0.45),bx=Math.round(fs*0.4),bh=fs+pad*2,by=H-bh-bx,bw=Math.min(W-bx*2,tw+pad*2);
+      g.fillStyle='rgba(255,255,255,0.88)';
+      if(g.roundRect){g.beginPath();g.roundRect(bx,by,bw,bh,pad);g.fill()}else g.fillRect(bx,by,bw,bh);
+      g.fillStyle='#2a2622';g.textBaseline='middle';g.fillText(name,bx+pad,by+bh/2,bw-pad*2);
+      URL.revokeObjectURL(u);
+      cv.toBlob(function(b){b?ok(b):ng(new Error('照片轉不出來'))},'image/jpeg',0.85);
+    };
+    im.onerror=function(){URL.revokeObjectURL(u);ng(new Error('照片讀不到'))};
+    im.src=u;
+  });
+}
+$('cam').addEventListener('change',function(){
+  var f=this.files&&this.files[0];this.value='';if(!f||!CUR)return;var c=CUR;
+  toast('寫名字中…');
+  stamp(f,nameOf(c)).then(function(b){var a=shotsOf(c).concat([b]);SHOTS[sk(c)]=a;return dbSet(sk(c),a)}).then(function(){render();toast(nameOf(c)+' 共 '+shotsOf(c).length+' 張')}).catch(function(e){toast('出錯：'+(e.message||e))});
+});
+$('list').addEventListener('click',function(e){
+  var t=e.target.closest('button,img,b');if(!t)return;
+  if(t.dataset.big){var bg=$('big');bg.querySelector('img').src=PH(t.dataset.big,2000);bg.style.display='flex';return}
+  if(t.dataset.sv){var bg2=$('big');bg2.querySelector('img').src=t.src;bg2.style.display='flex';return}
+  if(t.dataset.back){var cb=findC(t.dataset.back);if(cb){patch(cb,{st:PREV[cb.k]||'待抽'});toast(nameOf(cb)+' 拿回來了')}return}
+  if(t.dataset.add){
+    var nm=window.prompt('客人名字','');if(nm==null)return;nm=nm.trim();
+    var cnt=parseInt(window.prompt('抽幾抽？','1')||'',10)||'';
+    var ps0=people(),pos=parseInt(window.prompt('放在第幾位？（1～'+(ps0.length+1)+'）',String(ps0.length+1))||'',10)||ps0.length+1;
+    var k='手'+Date.now().toString(36);
+    var nc={k:k,set:SET,nick:nm,cust:'',cnt:cnt,text:'',img:'',st:'待抽',gone:false,picks:[],note:'',ord:0,nu:false,man:true,re:''};
+    D.cust.push(nc);push('抽賞_加手動',[SET,JSON.stringify({k:k,nick:nm,cnt:cnt}),'']);
+    ps0.splice(Math.max(0,Math.min(ps0.length,pos-1)),0,nc);renumber(ps0);toast('加好了：'+(nm||'（沒名字）'));return;
+  }
+  var box=t.closest('[data-k]');if(!box)return;var c=findC(box.dataset.k);if(!c)return;
+  if(t.dataset.x){
+    if(ARM!==c.k){ARM=c.k;render();clearTimeout(window.__armT);window.__armT=setTimeout(function(){if(ARM){ARM=null;render()}},4000);return}
+    ARM=null;PREV[c.k]=c.st;lsSet(P+'Prev',PREV);patch(c,{st:'已取消'});toast(nameOf(c)+' 刪掉了（下面「已刪掉」可以拿回來）');return;
+  }
+  if(t.dataset.up||t.dataset.dn||t.dataset.mv){
+    var ps=people(),i=ps.indexOf(c),j=i;
+    if(t.dataset.up)j=i-1;else if(t.dataset.dn)j=i+1;else{var v=parseInt(window.prompt('移到第幾位？（1～'+ps.length+'）',String(i+1))||'',10);if(!v)return;j=v-1}
+    j=Math.max(0,Math.min(ps.length-1,j));if(j===i)return;ps.splice(i,1);ps.splice(j,0,c);renumber(ps);return;
+  }
+  if(t.dataset.cam){CUR=c;$('cam').click();return}
+  if(t.dataset.del!=null){if(!confirm('刪掉這張照片？'))return;var a=shotsOf(c).slice();a.splice(+t.dataset.del,1);SHOTS[sk(c)]=a;dbSet(sk(c),a).then(render);return}
+  if(t.dataset.copy){var s='@'+nameOf(c);(navigator.clipboard&&navigator.clipboard.writeText?navigator.clipboard.writeText(s):Promise.reject()).then(function(){toast('已複製 '+s)}).catch(function(){window.prompt('長按複製：',s)});return}
+  if(t.dataset.unsent){delete SENT[sk(c)];lsSet('hokoriPrizeSent',SENT);render();return}
+  if(t.dataset.share){
+    var a2=shotsOf(c);if(!a2.length)return;
+    var fs=a2.map(function(b,n){return new File([b],nameOf(c).replace(/[\\\/:*?"<>|]/g,'')+'_'+(n+1)+'.jpg',{type:'image/jpeg'})});
+    if(!(navigator.canShare&&navigator.canShare({files:fs}))){toast('這支手機不能直接分享照片，請點照片長按存起來');return}
+    navigator.share({files:fs}).then(function(){var d=new Date();SENT[sk(c)]=(d.getMonth()+1)+'/'+d.getDate()+' '+d.getHours()+':'+('0'+d.getMinutes()).slice(-2);lsSet('hokoriPrizeSent',SENT);render();toast('分享好了，記得貼 @'+nameOf(c))}).catch(function(){});
+    return;
+  }
+});
+$('big').addEventListener('click',function(){this.style.display='none'});
+$('sel').addEventListener('change',function(){SET=this.value;lsSet(P+'Set',SET);ARM=null;render()});
+document.querySelectorAll('.tab').forEach(function(b){b.addEventListener('click',function(){MODE=b.dataset.mode;lsSet(P+'Mode',MODE);ARM=null;render()})});
+$('re').addEventListener('click',function(){flush();load()});
+var yT;$('list').addEventListener('scroll',function(){clearTimeout(yT);yT=setTimeout(function(){var m=lsGet(P+'Y',{});m[SET+MODE]=$('list').scrollTop;lsSet(P+'Y',m)},300)});
+window.addEventListener('resize',layout);layout();showSync();flush();load();
+})();
+</script>
+</body></html>

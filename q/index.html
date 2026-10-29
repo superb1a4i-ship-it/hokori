@@ -73,6 +73,11 @@ function show(d){
     if(g.st==='待下單')m+='<br><span class="due">尾款 '+money(g.due)+'，請下賣貨便</span>';
     else if(g.st==='等出貨')m+='<br><span class="ok">已下賣貨便'+(g.mb?'：'+esc(g.mb):'')+'</span><br>寄出後到門市取貨時付款';
     else if(g.st==='出貨')m+='<br><span class="ok">已寄出'+(g.mb?'・賣貨便 '+esc(g.mb):'')+'</span><br>到門市取貨時付款';
+    if(g.ship){var sp=g.ship,dd=sp.due?sp.due.slice(5).replace('-','/'):'';
+      if(sp.st==='已寄件')m+='<br>🚚 配送中';
+      else if(sp.st==='已到店')m+='<br><span class="due">📍 已到 '+esc(sp.store||'門市')+(dd?'，請在 '+dd+' 前取貨':'')+'</span>';
+      else if(sp.st==='已取件')m+='<br><span class="ok">✅ 已取件，謝謝您</span>';
+      else if(sp.st==='退回')m+='<br><span class="due">↩️ 包裹已退回，請跟我們聯絡</span>'}
     else if(g.dep<=0&&g.rev>0)m+='';
     h+='<div class="grp'+(i<2&&g.st!=='出貨'?' open':'')+'"><div class="gh" data-i="'+i+'"><span class="lab">'+esc(g.lab)+'</span><span class="st">'+esc(g.t)+'</span></div><div class="money">'+m+'</div><div class="items">'+
       g.items.map(function(r){return '<div class="it">'+(r.pic?'<img loading="lazy" src="'+pic(r.pic)+'" data-big="'+esc(r.pic)+'" alt="">':'<div class="nopic">沒照片</div>')+

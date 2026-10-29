@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>我的訂單｜日本扭蛋代購</title>
+<style>
+:root{--bg:#fbf6f1;--card:#fff;--ink:#2a2622;--sub:#7a7066;--line:#ece4da;--pink:#f7e3e6;--gold:#FFC93C;--green:#1F9D55;--red:#a32d2d}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.5 -apple-system,"PingFang TC","Noto Sans TC",sans-serif;padding:0 0 env(safe-area-inset-bottom)}
+header{background:#fff;border-bottom:1px solid var(--line);padding:calc(14px + env(safe-area-inset-top)) 16px 12px}
+h1{font-size:19px;margin:0}
+.sub{color:var(--sub);font-size:13px}
+main{max-width:640px;margin:auto;padding:12px 12px 40px}
+.sum{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-bottom:12px}
+.sum div{background:var(--pink);border-radius:14px;padding:10px 12px}
+.sum b{display:block;font-size:20px}
+.grp{background:var(--card);border:1px solid var(--line);border-radius:16px;margin-bottom:12px;overflow:hidden}
+.gh{display:flex;align-items:center;gap:8px;padding:12px 14px;cursor:pointer}
+.gh .lab{font-weight:700;font-size:17px}
+.gh .st{margin-left:auto;font-size:14px;font-weight:700;white-space:nowrap}
+.money{padding:0 14px 10px;font-size:14px;color:var(--sub)}
+.money .due{color:var(--red);font-weight:800;font-size:16px}
+.money .ok{color:var(--green);font-weight:700}
+.items{border-top:1px solid var(--line);display:none}
+.grp.open .items{display:block}
+.it{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid #f4eee7;align-items:center}
+.it img,.it .nopic{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:none;background:#f1ece5}
+.it .nopic{display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--sub)}
+.it .n{flex:1;min-width:0;font-size:15px}
+.it .p{font-size:14px;color:var(--sub);white-space:nowrap;text-align:right}
+.tag{font-size:12px;border-radius:999px;padding:1px 8px;margin-left:4px}
+.tag.ok{background:#e1f5ee;color:#085041}.tag.short{background:#fcebeb;color:var(--red)}
+.box{background:#fff;border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}
+.box input{width:100%;font-size:17px;padding:10px;border:1px solid #d9d1c7;border-radius:10px;margin:8px 0}
+.box button{width:100%;font-size:17px;padding:12px;border:0;border-radius:12px;background:#6b5443;color:#fff;font-weight:700}
+.err{color:var(--red);font-weight:700;white-space:pre-wrap}
+.big{position:fixed;inset:0;background:rgba(20,17,15,.92);display:none;align-items:center;justify-content:center;z-index:9}
+.big img{max-width:96%;max-height:90%;border-radius:12px}
+.empty{text-align:center;color:var(--sub);padding:30px 10px}
+</style>
+</head>
+<body>
+<header><h1 id="hi">我的訂單</h1><div class="sub" id="at">讀取中…</div></header>
+<main id="m"><div class="empty">讀取中…</div></main>
+<div class="big" id="big"><img alt="商品大圖"></div>
+<script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
+<script>
+var API='https://script.google.com/macros/s/AKfycbygGbeKAk3etQFnk4Y6DoOULoOqVPF6q0Ct8mrrLlsaXZkvcOYFWjQP76Aqf2KIUC7mow/exec',LIFF='2012273722-4vfR8J73';
+var $=function(i){return document.getElementById(i)};
+function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
+function money(n){return '$'+Number(n||0).toLocaleString()}
+var idt='',asTest='';
+function call(fn,args){var b={fn:fn,args:args||[]};if(asTest){b.as=asTest;b.asName=asTest;b.k=localStorage.getItem('hokoriKey')||''}else b.idt=idt;
+  return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b)}).then(function(r){return r.json()}).then(function(j){if(j.err)throw new Error(j.err);return j.r})}
+function pic(id){return id?'https:\/\/drive.google.com\/thumbnail?id='+encodeURIComponent(id)+'&sz=w400':''}
+function show(d){
+  $('at').textContent=d.at?('資料更新：'+d.at.slice(5).replace('-','/')+'（每 15 分鐘更新一次）'):'';
+  if(d.bind==='問是不是'){$('hi').textContent='我的訂單';
+    $('m').innerHTML='<div class="box"><b>請問你是社群裡的「'+esc(d.guess)+'」嗎？</b><div class="sub">確認一次就好，以後打開就直接看到訂單</div><button id="yes" style="margin-top:10px">✅ 是我</button><button id="no" style="margin-top:8px;background:#e8e2da;color:#2a2622">不是我</button><div class="err" id="e"></div></div>';
+    $('yes').onclick=function(){$('yes').disabled=true;call('客_是我').then(show).catch(function(x){$('e').textContent=x.message;$('yes').disabled=false})};
+    $('no').onclick=function(){show({bind:'未綁定',name:d.name})};return}
+  if(d.bind!=='已綁定'){$('hi').textContent='我的訂單';
+    if(d.bind==='待確認'){$('m').innerHTML='<div class="box"><b>已經收到囉！</b><br>我們確認是你之後，就能在這裡看到訂單，通常一天內會好。</div>';return}
+    $('m').innerHTML='<div class="box"><b>第一次使用，請告訴我們你是誰</b><div class="sub">請打你在「日本扭蛋代購」社群裡的暱稱（只要打一次）</div><input id="nk" placeholder="例：思婕" maxlength="40"><button id="go">送出</button><div class="err" id="e"></div></div>';
+    $('go').onclick=function(){var v=$('nk').value.trim();if(!v)return;$('go').disabled=true;call('客_申請',[v]).then(show).catch(function(x){$('e').textContent=x.message;$('go').disabled=false})};return}
+  $('hi').textContent=(d.show||'')+' 的訂單';
+  var gs=d.groups||[];if(!gs.length){$('m').innerHTML='<div class="empty">目前沒有訂單 🙌</div>';return}
+  var due=0,wait=0;gs.forEach(function(g){if(g.st==='待下單')due+=g.due;if(g.st!=='出貨')wait++});
+  var h='<div class="sum"><div>還沒寄出的批次<b>'+wait+'</b></div><div>還沒下賣貨便的尾款<b>'+money(due)+'</b></div></div>';
+  gs.forEach(function(g,i){
+    var m='商品 '+money(g.rev);if(g.dep>0)m+='　已付定金 '+money(g.dep);
+    if(g.st==='待下單')m+='<br><span class="due">尾款 '+money(g.due)+'，請下賣貨便</span>';
+    else if(g.st==='等出貨')m+='<br><span class="ok">已下賣貨便'+(g.mb?'：'+esc(g.mb):'')+'</span><br>寄出後到門市取貨時付款';
+    else if(g.st==='出貨')m+='<br><span class="ok">已寄出'+(g.mb?'・賣貨便 '+esc(g.mb):'')+'</span><br>到門市取貨時付款';
+    else if(g.dep<=0&&g.rev>0)m+='';
+    h+='<div class="grp'+(i<2&&g.st!=='出貨'?' open':'')+'"><div class="gh" data-i="'+i+'"><span class="lab">'+esc(g.lab)+'</span><span class="st">'+esc(g.t)+'</span></div><div class="money">'+m+'</div><div class="items">'+
+      g.items.map(function(r){return '<div class="it">'+(r.pic?'<img loading="lazy" src="'+pic(r.pic)+'" data-big="'+esc(r.pic)+'" alt="">':'<div class="nopic">沒照片</div>')+
+        '<div class="n">'+esc(r.n)+(r.short?'<span class="tag short">還在確認</span>':'')+'</div><div class="p">×'+r.q+'<br>'+money(r.sub)+'</div></div>'}).join('')+
+      (g.fees||[]).map(function(f){return '<div class="it"><div class="nopic">費用</div><div class="n">'+esc(f.n)+'</div><div class="p">'+money(f.sub)+'</div></div>'}).join('')+'</div></div>'});
+  $('m').innerHTML=h;
+}
+document.addEventListener('click',function(e){var gh=e.target.closest('.gh');if(gh){gh.parentNode.classList.toggle('open');return}
+  var b=e.target.getAttribute&&e.target.getAttribute('data-big');if(b){$('big').querySelector('img').src=pic(b).replace('w400','w1200');$('big').style.display='flex';return}
+  if(e.target.closest('#big'))$('big').style.display='none'});
+function fail(x){$('m').innerHTML='<div class="box err">'+esc(x.message||x)+'</div>'}
+(function(){var q=new URLSearchParams(location.search);asTest=q.get('as')||'';
+  if(asTest){call('客_我的').then(show).catch(fail);return}
+  if(!window.liff||LIFF.indexOf('%')===0){fail('請從「日本扭蛋代購」官方賴下面的選單打開');return}
+  liff.init({liffId:LIFF}).then(function(){if(!liff.isLoggedIn()){liff.login();return}idt=liff.getIDToken();return call('客_我的').then(show)}).catch(fail)})();
+</script>
+</body>
+</html>

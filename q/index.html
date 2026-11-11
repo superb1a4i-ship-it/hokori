@@ -68,7 +68,7 @@ details.box summary{font-weight:700;cursor:pointer}
 </head>
 <body>
 <header><h1 id="hi">我的訂單</h1><div class="sub" id="at">讀取中…</div>
-<div class="tabs"><button id="tO" class="on">📦 我的訂單</button><button id="tW">🌟 許願池</button></div></header>
+</header>
 <main id="m"><div class="empty">讀取中…</div></main>
 <div class="big" id="big"><img alt="商品大圖"></div>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
@@ -77,7 +77,7 @@ var API='https://script.google.com/macros/s/AKfycbygGbeKAk3etQFnk4Y6DoOULoOqVPF6
 var $=function(i){return document.getElementById(i)};
 function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function money(n){return '$'+Number(n||0).toLocaleString()}
-var idt='',asTest='',VIEW='o',D=null,W=null;
+var idt='',asTest='',VIEW='o',D=null,W=null,START='o';
 function call(fn,args){var b={fn:fn,args:args||[]};if(asTest){b.as=asTest;b.asName=asTest;b.k=localStorage.getItem('hokoriKey')||''}else b.idt=idt;
   return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b)}).then(function(r){return r.json()}).then(function(j){if(j.err)throw new Error(j.err);return j.r})}
 function pic(id){return id?'https:\/\/drive.google.com\/thumbnail?id='+encodeURIComponent(id)+'&sz=w400':''}
@@ -89,8 +89,7 @@ function eta(g){
   if(g.st==='集運'&&/^\d{4}-\d{2}-\d{2}$/.test(g.k)){var d=addDays(g.k,14);return d>=todayS()?'預計 '+md(d)+' 那週通知下單':'快到囉，整理好就會通知下單'}
   if(g.st==='整理中')return '整理好就會通知下單';
   return ''}
-function tab(v){VIEW=v;$('tO').className=v==='o'?'on':'';$('tW').className=v==='w'?'on':'';if(v==='o'){if(D)show(D);else loadO()}else loadW()}
-function loadO(){$('m').innerHTML='<div class="empty">讀取中…</div>';call('客_我的').then(function(d){D=d;show(d)}).catch(fail)}
+function tab(v){VIEW=v;if(v==='w')return loadW();$('m').innerHTML='<div class="empty">讀取中…</div>';call('客_我的').then(function(d){D=d;v==='h'?showHold(d):show(d)}).catch(fail)}
 function grpHtml(g,i){
   var m='商品 '+money(g.rev);if(g.dep>0)m+='　已付訂金 '+money(g.dep);
   if(g.st==='待下單')m+=g.hold?'<br><span class="tag hold">🔗 已登記併下次</span> 等下一批到再一起下單':'<br><span class="due">要下單 '+money(Math.max(0,g.rev-g.dep))+'</span>';
@@ -106,13 +105,12 @@ function grpHtml(g,i){
     g.items.map(function(r){return '<div class="it">'+(r.pic?'<img loading="lazy" src="'+pic(r.pic)+'" data-big="'+esc(r.pic)+'" alt="">':'<div class="nopic">沒照片</div>')+
       '<div class="n">'+esc(r.n)+(r.short?'<span class="tag short">還在確認</span>':'')+'</div><div class="p">×'+r.q+'<br>'+money(r.sub)+'</div></div>'}).join('')+
     (g.fees||[]).map(function(f){return '<div class="it"><div class="nopic">費用</div><div class="n">'+esc(f.n)+'</div><div class="p">'+money(f.sub)+'</div></div>'}).join('')+'</div></div>'}
-var RULES='<details class="box"><summary>📌 併單規則</summary><div style="margin-top:6px;font-size:15px">・最多併一次（累積兩批，寄出後歸零）<br>・併一次約多等 1～2 週<br>・未付訂金需先結清款項<br>・要併單的請先不要下單，等收到新通知再一起下單<br>・想併下次，按官方賴下面選單「🔗 併下次」就可以囉</div></details>';
 var COLORS=['#d9822b','#3b82c4','#8e5bc7','#2f9e6a','#c2477a'];
 function show(d){
   $('at').textContent=d.at?('資料更新：'+md(d.at)+' '+d.at.slice(11)+'（每 15 分鐘更新一次）'):'';
   if(d.bind==='問是不是'){$('hi').textContent='我的訂單';
     $('m').innerHTML='<div class="box"><b>請問你是社群裡的「'+esc(d.guess)+'」嗎？</b><div class="sub">確認一次就好，以後打開就直接看到訂單</div><button class="main" id="yes" style="margin-top:10px">✅ 是我</button><button class="main" id="no" style="margin-top:8px;background:#e8e2da;color:#2a2622">不是我</button><div class="err" id="e"></div></div>';
-    $('yes').onclick=function(){$('yes').disabled=true;call('客_是我').then(function(x){D=x;show(x)}).catch(function(x){$('e').textContent=x.message;$('yes').disabled=false})};
+    $('yes').onclick=function(){$('yes').disabled=true;call('客_是我').then(function(x){D=x;VIEW==='h'?showHold(x):show(x)}).catch(function(x){$('e').textContent=x.message;$('yes').disabled=false})};
     $('no').onclick=function(){show({bind:'未綁定',name:d.name})};return}
   if(d.bind!=='已綁定'){$('hi').textContent='我的訂單';
     if(d.bind==='待確認'){$('m').innerHTML='<div class="box"><b>已經收到囉！</b><br>我們確認是你之後，就能在這裡看到訂單，通常一天內會好。</div>';return}
@@ -142,11 +140,22 @@ function show(d){
     if(g.mb&&mbs[g.mb]>1){if(done[g.mb])return;done[g.mb]=1;var col=COLORS[ci++%COLORS.length];var same=act.filter(function(x){return x.mb===g.mb});
       h+='<div class="together" style="--c:'+col+'"><div class="tg">🔗 這幾批一起寄（'+esc(same.map(function(x){return x.lab}).join('＋'))+'）</div>'+same.map(function(x){return grpHtml(x,i)}).join('')+'</div>';return}
     h+=grpHtml(g,i)});
-  h+=RULES;
+
   if(hist.length)h+='<details class="box"><summary>📜 歷史訂單（已取件 '+hist.length+' 筆）</summary><div style="margin-top:8px">'+hist.map(function(g,i){return grpHtml(g,9)}).join('')+'</div></details>';
   $('m').innerHTML=h;}
+/* 併下次：只列這個人可以併的批次＋併單規則 */
+function showHold(d){if(d.bind!=='已綁定')return show(d);$('hi').textContent='🔗 併下次';$('at').textContent='勾選要一起寄的批次';document.title='併下次｜日本扭蛋代購';
+  var c=(d.groups||[]).filter(function(g){return g.st!=='出貨'&&!g.mb});
+  var h='<div class="box" style="font-size:15px"><b>📌 併單規則</b><div style="margin-top:6px">・最多併一次（累積兩批，寄出後歸零）<br>・併一次約多等 1～2 週<br>・要併的批次都還沒付訂金、而且這批 $300 以上，要先結清這批<br>・要併單的請先不要下單，等收到新通知再一起下單</div></div>';
+  if(!c.length){h+='<div class="empty">目前沒有可以併的批次 🙌</div>';$('m').innerHTML=h;return}
+  var held=c.filter(function(g){return g.hold});
+  h+='<div class="box"><b>請勾要一起寄的批次（最多兩批）</b><div class="note" style="margin:4px 0 6px">例：勾「這批」＋「還在日本的那批」，就會等那批到了再一起寄</div>'+
+    (held.length?'<div class="note" style="color:#8a5a00;margin-bottom:6px">已登記併單：'+esc(held.map(function(g){return g.lab}).join('、'))+'</div>':'')+
+    c.map(function(g){return '<label style="display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line)"><input type="checkbox" class="hk" value="'+esc(g.k)+'"'+(g.hold?' checked':'')+' style="width:24px;height:24px;flex:none"><span style="flex:1"><b>'+esc(g.lab)+'</b>　'+esc(g.t)+'<br><span class="note">商品 '+money(g.rev)+(g.dep>0?'・已付訂金 '+money(g.dep):'・還沒付訂金')+'</span></span></label>'}).join('')+
+    '<button class="main" id="hgo" style="margin-top:12px">送出併單</button><div class="err" id="he"></div></div>';
+  $('m').innerHTML=h;}
 /* 許願池 */
-function loadW(){$('m').innerHTML='<div class="empty">讀取中…</div>';call('客_許願清單').then(function(w){W=w;showW()}).catch(fail)}
+function loadW(){$('hi').textContent='🌟 許願池';document.title='許願池｜日本扭蛋代購';$('at').textContent='想找什麼都可以許願，大家都看得到';$('m').innerHTML='<div class="empty">讀取中…</div>';call('客_許願清單').then(function(w){W=w;showW()}).catch(fail)}
 function showW(){var L=W.list||[];
   var h='<div class="box"><b>🌟 想找什麼？許個願吧！</b><div class="sub">大家都看得到，也可以按「我也想要」。小幫手會依大家想要的程度去找喔</div>'+
     '<textarea id="wt" rows="2" placeholder="想要什麼？例：吉伊卡哇 聖誕兔吊飾 粉色"></textarea><input id="wl" placeholder="有連結可以貼這裡（可不填）"><input id="wp" type="file" accept="image/*"><button class="main" id="wgo">許願 🌟</button><div class="err" id="we"></div></div>';
@@ -162,7 +171,9 @@ function showW(){var L=W.list||[];
     $('wgo').disabled=true;$('we').textContent='';(f?shrink(f):Promise.resolve('')).then(function(b){return call('客_許願',[t,l,b])}).then(function(w){W=w;showW()}).catch(function(x){$('we').textContent=x.message;$('wgo').disabled=false})};}
 function shrink(f){return new Promise(function(ok,bad){var r=new FileReader();r.onload=function(){var im=new Image();im.onload=function(){var s=Math.min(1,1000/Math.max(im.width,im.height));var c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);ok(c.toDataURL('image/jpeg',0.82))};im.onerror=function(){bad(new Error('照片讀不到'))};im.src=r.result};r.readAsDataURL(f)})}
 document.addEventListener('click',function(e){var t=e.target;
-  if(t.id==='tO')return tab('o');if(t.id==='tW')return tab('w');
+  if(t.className==='hk'){var on=document.querySelectorAll('.hk:checked');if(on.length>2){t.checked=false;alert('最多只能勾兩批（併一次）')}return}
+  if(t.id==='hgo'){var ks=[].map.call(document.querySelectorAll('.hk:checked'),function(x){return x.value});if(!ks.length){$('he').textContent='請先勾要併的批次';return}
+    t.disabled=true;call('客_併單',[ks]).then(function(r){alert(r.msg);D=r.me;showHold(D)}).catch(function(x){$('he').textContent=x.message;t.disabled=false});return}
   var cp=t.getAttribute&&t.getAttribute('data-cp');if(cp!=null){(navigator.clipboard?navigator.clipboard.writeText(cp):Promise.reject()).then(function(){t.textContent='已複製 ✓'}).catch(function(){prompt('長按複製：',cp)});return}
   var wa=t.getAttribute&&t.getAttribute('data-want');if(wa){t.disabled=true;call('客_想要',[wa]).then(function(w){W=w;showW()}).catch(function(x){alert(x.message);t.disabled=false});return}
   var wd=t.getAttribute&&t.getAttribute('data-wdel');if(wd){if(!confirm('刪掉這個願望？'))return;call('客_刪願',[wd]).then(function(w){W=w;showW()}).catch(function(x){alert(x.message)});return}
@@ -171,11 +182,11 @@ document.addEventListener('click',function(e){var t=e.target;
   var b=t.getAttribute&&t.getAttribute('data-big');if(b){$('big').querySelector('img').src=pic(b).replace('w400','w1200');$('big').style.display='flex';return}
   if(t.closest&&t.closest('#big'))$('big').style.display='none'});
 function fail(x){$('m').innerHTML='<div class="box err">'+esc(x.message||x)+'</div>'}
-(function(){var q=new URLSearchParams(location.search);asTest=q.get('as')||'';var start=q.get('p')==='wish'?'w':'o';
+(function(){var q=new URLSearchParams(location.search);asTest=q.get('as')||'';var pp=q.get('p');var start=pp==='wish'?'w':pp==='hold'?'h':'o';
   var go=function(){tab(start)};
   if(asTest){go();return}
   if(!window.liff||LIFF.indexOf('%')===0){fail('請從「日本扭蛋代購」官方賴下面的選單打開');return}
-  liff.init({liffId:LIFF}).then(function(){if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return}idt=liff.getIDToken();q=new URLSearchParams(location.search);start=q.get('p')==='wish'?'w':'o';go()}).catch(fail)})();
+  liff.init({liffId:LIFF}).then(function(){if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return}idt=liff.getIDToken();q=new URLSearchParams(location.search);pp=q.get('p');start=pp==='wish'?'w':pp==='hold'?'h':'o';go()}).catch(fail)})();
 </script>
 </body>
 </html>

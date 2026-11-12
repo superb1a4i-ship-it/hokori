@@ -85,7 +85,7 @@ function md(s){return s?(+s.slice(5,7))+'/'+(+s.slice(8,10)):''}
 function addDays(k,n){var d=new Date(k+'T12:00:00+09:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
 function todayS(){var d=new Date(Date.now()+9*3600e3);return d.toISOString().slice(0,10)}
 function eta(g){
-  if(g.st==='日本')return '送集運後約兩週通知下單';
+  if(g.st==='日本'){var d=new Date(Date.now()+9*3600e3),w=d.getUTCDay();d.setUTCDate(d.getUTCDate()+(w===0?0:7-w));return '預計 '+md(d.toISOString().slice(0,10))+'（日）送集運，送集運後約兩週通知下單'}
   if(g.st==='集運'&&/^\d{4}-\d{2}-\d{2}$/.test(g.k)){var d=addDays(g.k,14);return d>=todayS()?'預計 '+md(d)+' 那週通知下單':'快到囉，整理好就會通知下單'}
   if(g.st==='整理中')return '整理好就會通知下單';
   return ''}
@@ -126,7 +126,7 @@ function show(d){
   if(free.length){var amt=pend.reduce(function(a,g){return a+g.rev-g.dep},0);var fill=amt<20?20:amt,back=amt<20?20-amt:0;
     h+='<div class="sum">🧾 這次要下單：<b>'+money(Math.max(amt,0))+'</b></div>';
     h+='<div class="order"><h3>🛒 這次要下的是：'+esc(pend.map(function(g){return g.lab}).join('、'))+'</h3>'+
-      '<div class="note" style="color:#a32d2d;background:#fdecea;border-radius:8px;padding:8px 10px;margin:8px 0;line-height:1.5">⚠️ <b>請勿提早下單</b>，也請不要為了保留免運券先下單！一定要收到群主的下單通知後再下單。我們是整批寄出，沒辦法另外挑出還沒到的商品；提早下單造成賣貨便過期，我們無法負責喔 🙏</div>'+
+      '<div class="note" style="margin:6px 0">請照下面這個金額填寫就好 🙏（之後又有批次到台灣，再按一次「我要下單」，金額會自動更新）</div>'+
       (back?'<div class="note" style="color:#a32d2d">💌 賣貨便最低要填 $20，多付的 '+money(back)+' 我們會放在包裹裡退給您</div>':'')+
       '<a class="go" href="'+SHOP+'" target="_blank">🌱 打開自填單賣場</a><div class="note">照這樣填 👇（按「複製」再貼到賣貨便）</div>'+
       '<div class="ln"><span>📝 商品名稱：<b>'+esc(d.c)+'</b></span><button class="cp" data-cp="'+esc(d.c)+'">複製</button></div>'+
@@ -134,7 +134,7 @@ function show(d){
       '<div class="ln"><span>💵 金額：<b>'+fill+'</b></span><button class="cp" data-cp="'+fill+'">複製</button></div>'+
       '<div class="note" style="margin-top:8px">要改宅配（運費 $80）請聯絡小幫手喔</div></div>';}
   else if(pend.length)h+='<div class="sum">🔗 您登記了併下次，等下一批到了再一起下單 📦</div>';
-  else h+='<div class="sum">目前沒有要下單的 🙌</div><div class="note" style="color:#a32d2d;background:#fdecea;border-radius:8px;padding:8px 10px;margin:8px 0;line-height:1.5">⚠️ <b>請勿提早下單</b>，也請不要為了保留免運券先下單！一定要收到群主的下單通知後再下單。我們是整批寄出，沒辦法另外挑出還沒到的商品；提早下單造成賣貨便過期，我們無法負責喔 🙏</div>';
+  else h+='<div class="sum">目前沒有要下單的 🙌</div><div class="note" style="color:#8a4b2f;background:#fdf1e7;border-radius:8px;padding:8px 10px;margin:8px 0;line-height:1.6">請勿提早下單，也請不要為了保留免運券先下單 🙏<br>因作業流程是整批整批產出條碼，無法另外挑出還沒到貨的商品，提早下單造成賣貨便過期，無法負責。<br>請一定要收到下單通知後再下單，謝謝配合 💕</div>';
   if(!act.length)h+='<div class="empty">目前沒有進行中的訂單 🙌</div>';
   var mbs={},ci=0;act.forEach(function(g){if(g.mb){mbs[g.mb]=(mbs[g.mb]||0)+1}});
   var done={};act.forEach(function(g,i){

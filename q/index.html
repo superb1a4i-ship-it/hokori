@@ -85,7 +85,7 @@ function md(s){return s?(+s.slice(5,7))+'/'+(+s.slice(8,10)):''}
 function addDays(k,n){var d=new Date(k+'T12:00:00+09:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
 function todayS(){var d=new Date(Date.now()+9*3600e3);return d.toISOString().slice(0,10)}
 function eta(g){
-  if(g.st==='日本'){var d=new Date(Date.now()+9*3600e3),w=d.getUTCDay();d.setUTCDate(d.getUTCDate()+(w===0?0:7-w));return '預計 '+md(d.toISOString().slice(0,10))+'（日）送集運，送集運後約兩週內會通知下單'}
+  if(g.st==='日本'){var d=new Date(Date.now()+9*3600e3),w=d.getUTCDay();d.setUTCDate(d.getUTCDate()+(w===0?0:7-w));var sd=(D&&D.ship)||d.toISOString().slice(0,10);return '預計 '+md(sd)+'（'+'日一二三四五六'[new Date(sd+'T12:00:00+09:00').getDay()]+'）送集運，送集運後約兩週內會通知下單'}
   if(g.st==='集運'&&/^\d{4}-\d{2}-\d{2}$/.test(g.k)){var d=addDays(g.k,14);return d>=todayS()?'預計 '+md(d)+' 那週通知下單':'快到囉，整理好就會通知下單'}
   if(g.st==='整理中')return '整理好就會通知下單';
   return ''}
@@ -93,7 +93,7 @@ function tab(v){VIEW=v;if(v==='w')return loadW();$('m').innerHTML='<div class="e
 function grpHtml(g,i){
   var m='商品 '+money(g.rev);if(g.dep>0)m+='　已付訂金 '+money(g.dep);
   if(g.st==='待下單')m+=g.hold?'<br><span class="tag hold">🔗 已登記併下次</span> 等下一批到再一起下單':'<br><span class="due">要下單 '+money(Math.max(0,g.rev-g.dep))+'</span>';
-  else if(g.st==='等出貨')m+='<br><span class="ok">已下賣貨便</span>，通常週四或週五寄出，到門市取貨付款';
+  else if(g.st==='等出貨')m+='<br><span class="ok">已下賣貨便</span>，'+(D&&D.wk?'六日包貨小幫手休息，下週一左右寄出':'通常週四或週五寄出')+'，到門市取貨付款';
   else if(g.st==='出貨')m+='<br><span class="ok">已寄出</span>';
   if(g.ship){var sp=g.ship,dd=sp.due?md(sp.due):'';
     if(sp.st==='已寄件')m+='<br>🚚 配送中';
@@ -126,7 +126,7 @@ function show(d){
   if(free.length){var amt=pend.reduce(function(a,g){return a+g.rev-g.dep},0);var fill=amt<20?20:amt,back=amt<20?20-amt:0;
     h+='<div class="sum">🧾 這次要下單：<b>'+money(Math.max(amt,0))+'</b></div>';
     h+='<div class="order"><h3>🛒 這次要下的是：'+esc(pend.map(function(g){return g.lab}).join('、'))+'</h3>'+
-      '<div class="note" style="margin:6px 0">請照下面這個金額填寫就好 🙏（之後又有批次到台灣，再按一次「我要下單」，金額會自動更新）</div>'+
+      (d.wk?'<div class="note" style="margin:6px 0;color:#8a4b2f">📦 六日包貨小幫手休息，現在下單會在下週一左右寄出喔</div>':'')+'<div class="note" style="margin:6px 0">請照下面這個金額填寫就好 🙏（之後又有批次到台灣，再按一次「我要下單」，金額會自動更新）</div>'+
       (back?'<div class="note" style="color:#a32d2d">💌 賣貨便最低要填 $20，多付的 '+money(back)+' 我們會放在包裹裡退給您</div>':'')+
       '<a class="go" href="'+SHOP+'" target="_blank">🌱 打開自填單賣場</a><div class="note">照這樣填 👇（按「複製」再貼到賣貨便）</div>'+
       '<div class="ln"><span>📝 商品名稱：<b>'+esc(d.c)+'</b></span><button class="cp" data-cp="'+esc(d.c)+'">複製</button></div>'+

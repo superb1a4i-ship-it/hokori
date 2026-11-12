@@ -126,7 +126,7 @@ function show(d){
   var act=gs.filter(function(g){return hist.indexOf(g)<0});
   var pend=act.filter(function(g){return g.st==='待下單'&&!g.mb});
   var free=pend.filter(function(g){return !g.hold});
-  var h='<div class="note" style="color:#8a4b2f;background:#fdf1e7;border-radius:8px;padding:8px 10px;margin:0 0 10px;line-height:1.6">還沒收到下單通知前，請不要為了保留免運券提早下單 🙏<br>因作業流程為整批產出條碼，無法另外挑出還沒到貨的商品，提早下單造成賣貨便條碼過期，無法負責。</div>';
+  var h='<div class="note" style="color:#8a4b2f;background:#fdf1e7;border-radius:8px;padding:8px 10px;margin:0 0 10px;line-height:1.6">還沒收到下單通知前，請不要為了保留免運券提早下單 🙏<br>因作業流程為整批產出條碼，無法另外挑出還沒到貨的商品，提早下單造成賣貨便條碼過期，無法負責請見諒</div>';
   if(free.length){var amt=pend.reduce(function(a,g){return a+g.rev-g.dep},0);var fill=amt<20?20:amt,back=amt<20?20-amt:0;
     h+='<div class="sum">🧾 這次要下單：<b>'+money(Math.max(amt,0))+'</b></div>';
     h+='<div class="order"><h3>🛒 這次要下的是：'+esc(pend.map(function(g){return g.lab}).join('、'))+'</h3>'+

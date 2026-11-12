@@ -93,7 +93,7 @@ function tab(v){VIEW=v;if(v==='w')return loadW();$('m').innerHTML='<div class="e
 function grpHtml(g,i){
   var m='商品 '+money(g.rev);if(g.dep>0)m+='　已付訂金 '+money(g.dep);
   if(g.st==='待下單')m+=g.hold?'<br><span class="tag hold">🔗 已登記併下次</span> 等下一批到再一起下單':'<br><span class="due">要下單 '+money(Math.max(0,g.rev-g.dep))+'</span>';
-  else if(g.st==='等出貨')m+='<br><span class="ok">已下賣貨便</span>，'+(D&&D.wk?'六日包貨小幫手休息，下週一左右寄出':'通常週四或週五寄出')+'，到門市取貨付款';
+  else if(g.st==='等出貨')m+='<br><span class="ok">已下賣貨便</span>，'+(D&&D.wk2?D.wk2:'通常週四或週五寄出')+'，到門市取貨付款';
   else if(g.st==='出貨')m+='<br><span class="ok">已寄出</span>';
   if(g.ship){var sp=g.ship,dd=sp.due?md(sp.due):'';
     if(sp.st==='已寄件')m+='<br>🚚 配送中';
@@ -126,7 +126,7 @@ function show(d){
   if(free.length){var amt=pend.reduce(function(a,g){return a+g.rev-g.dep},0);var fill=amt<20?20:amt,back=amt<20?20-amt:0;
     h+='<div class="sum">🧾 這次要下單：<b>'+money(Math.max(amt,0))+'</b></div>';
     h+='<div class="order"><h3>🛒 這次要下的是：'+esc(pend.map(function(g){return g.lab}).join('、'))+'</h3>'+
-      (d.wk?'<div class="note" style="margin:6px 0;color:#8a4b2f">📦 六日包貨小幫手休息，現在下單會在下週一左右寄出喔</div>':'')+'<div class="note" style="margin:6px 0">請照下面這個金額填寫就好 🙏（之後又有批次到台灣，再按一次「我要下單」，金額會自動更新）</div>'+
+      (d.wk?'<div class="note" style="margin:6px 0;color:#8a4b2f">📦 '+d.wk+'</div>':'')+'<div class="note" style="margin:6px 0">請照下面這個金額填寫就好 🙏（之後又有批次到台灣，再按一次「我要下單」，金額會自動更新）</div>'+
       (back?'<div class="note" style="color:#a32d2d">💌 賣貨便最低要填 $20，多付的 '+money(back)+' 我們會放在包裹裡退給您</div>':'')+
       '<a class="go" href="'+SHOP+'" target="_blank">🌱 打開自填單賣場</a><div class="note">照這樣填 👇（按「複製」再貼到賣貨便）</div>'+
       '<div class="ln"><span>📝 商品名稱：<b>'+esc(d.c)+'</b></span><button class="cp" data-cp="'+esc(d.c)+'">複製</button></div>'+

@@ -90,6 +90,7 @@ function eta(g){
   if(g.st==='整理中')return '整理好就會通知下單';
   return ''}
 function tab(v){VIEW=v;if(v==='w')return loadW();if(v==='f')return loadF();var ck='hokoriMe'+(asTest?'T':''),old=null;try{old=JSON.parse(localStorage.getItem(ck)||'null')}catch(e){}
+  if(v==='b')old=null; /* 綁定頁一定要看最新的，不先顯示上次的 */
   if(old&&old.bind==='已綁定'){D=old;rend(v,old);$('at').textContent='更新中…（先顯示上次看到的）'}else $('m').innerHTML='<div class="empty">讀取中…</div>';
   call('客_我的').then(function(d){D=d;try{localStorage.setItem(ck,JSON.stringify(d))}catch(e){}if(VIEW!==v)return;rend(v,d)}).catch(function(x){if(old&&old.bind==='已綁定')$('at').textContent='更新失敗，顯示的是上次的資料';else fail(x)})}
 function grpHtml(g,i){

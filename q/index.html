@@ -103,7 +103,7 @@ function grpHtml(g,i){
     if(sp.st==='已寄件'||sp.st==='已到店')m+='<br><span class="note">⚠️ 包裹退回會收取退回處理費，請務必在期限內取貨</span>';
     else if(sp.st==='已取件')m+='<br><span class="ok">✅ 已取件，謝謝您</span>';
     else if(sp.st==='退回')m+='<br><span class="due">↩️ 包裹已退回，請跟我們聯絡</span>'}
-  if(g.kuji&&g.st!=='出貨')m+='<br><span class="note">⚖️ 一番賞的國際運費還沒秤重，秤好後金額會自動補上</span>';
+  if(g.kuji&&g.st!=='出貨')m+='<br><span class="note">⚖️ 一番賞的國際運費還沒秤重，秤好才能下單</span>';
   var e=eta(g);if(e&&!g.hold)m+='<br>'+esc(e);
   return '<div class="grp'+(i<2&&g.st!=='出貨'?' open':'')+'"><div class="gh"><span class="lab">'+esc(g.lab)+'</span><span class="st">'+esc(g.t)+'</span></div><div class="money">'+m+'</div><div class="items">'+
     g.items.map(function(r){return '<div class="it">'+(r.pic?'<img loading="lazy" src="'+pic(r.pic)+'" data-big="'+esc(r.pic)+'" alt="">':'<div class="nopic">沒照片</div>')+
@@ -126,7 +126,7 @@ function show(d){
   var act=gs.filter(function(g){return hist.indexOf(g)<0});
   var pend=act.filter(function(g){return g.st==='待下單'&&!g.mb});
   var free=pend.filter(function(g){return !g.hold});
-  var h='';
+  var h='<div class="note" style="color:#8a4b2f;background:#fdf1e7;border-radius:8px;padding:8px 10px;margin:0 0 10px;line-height:1.6">還沒收到下單通知前，請不要為了保留免運券提早下單 🙏<br>因作業流程為整批產出條碼，無法另外挑出還沒到貨的商品，提早下單造成賣貨便條碼過期，無法負責。</div>';
   if(free.length){var amt=pend.reduce(function(a,g){return a+g.rev-g.dep},0);var fill=amt<20?20:amt,back=amt<20?20-amt:0;
     h+='<div class="sum">🧾 這次要下單：<b>'+money(Math.max(amt,0))+'</b></div>';
     h+='<div class="order"><h3>🛒 這次要下的是：'+esc(pend.map(function(g){return g.lab}).join('、'))+'</h3>'+
@@ -138,12 +138,12 @@ function show(d){
       '<div class="ln"><span>💵 金額：<b>'+fill+'</b></span><button class="cp" data-cp="'+fill+'">複製</button></div>'+
       '<div class="note" style="margin-top:8px">要改宅配（運費 $80）請聯絡小幫手喔</div></div>';}
   else if(pend.length)h+='<div class="sum">🔗 您登記了併單，等下一批到了再一起下單 📦</div>';
-  else h+='<div class="sum">目前沒有要下單的 🙌</div><div class="note" style="color:#8a4b2f;margin:6px 0">還沒收到下單通知前，請先不要下單喔 🙏</div>';
+  else h+='<div class="sum">目前沒有要下單的 🙌</div>';
   if(!act.length)h+='<div class="empty">目前沒有進行中的訂單 🙌</div>';
   var mbs={},ci=0;act.forEach(function(g){if(g.mb){mbs[g.mb]=(mbs[g.mb]||0)+1}});
   var done={};act.forEach(function(g,i){
     if(g.mb&&mbs[g.mb]>1){if(done[g.mb])return;done[g.mb]=1;var col=COLORS[ci++%COLORS.length];var same=act.filter(function(x){return x.mb===g.mb});
-      h+='<div class="together" style="--c:'+col+'"><div class="tg">📦 同一張訂單：'+esc(same.map(function(x){return x.lab}).join('＋'))+'</div>'+same.map(function(x){return grpHtml(x,i)}).join('')+'</div>';return}
+      h+='<div class="together" style="--c:'+col+'"><div class="tg">📦 併單寄出（'+esc(same.map(function(x){return x.lab}).join('＋'))+'）</div>'+same.map(function(x){return grpHtml(x,i)}).join('')+'</div>';return}
     h+=grpHtml(g,i)});
 
   if(hist.length)h+='<details class="box"><summary>📜 歷史訂單（已取件 '+hist.length+' 筆）</summary><div style="margin-top:8px">'+hist.map(function(g,i){return grpHtml(g,9)}).join('')+'</div></details>';

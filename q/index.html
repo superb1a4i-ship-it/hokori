@@ -85,7 +85,7 @@ function md(s){return s?(+s.slice(5,7))+'/'+(+s.slice(8,10)):''}
 function addDays(k,n){var d=new Date(k+'T12:00:00+09:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
 function todayS(){var d=new Date(Date.now()+9*3600e3);return d.toISOString().slice(0,10)}
 function eta(g){
-  if(g.st==='日本'){var d=new Date(Date.now()+9*3600e3),w=d.getUTCDay();d.setUTCDate(d.getUTCDate()+(w===0?0:7-w));return '預計 '+md(d.toISOString().slice(0,10))+'（日）送集運，送集運後約兩週通知下單'}
+  if(g.st==='日本'){var d=new Date(Date.now()+9*3600e3),w=d.getUTCDay();d.setUTCDate(d.getUTCDate()+(w===0?0:7-w));return '預計 '+md(d.toISOString().slice(0,10))+'（日）送集運，送集運後約兩週內會通知下單'}
   if(g.st==='集運'&&/^\d{4}-\d{2}-\d{2}$/.test(g.k)){var d=addDays(g.k,14);return d>=todayS()?'預計 '+md(d)+' 那週通知下單':'快到囉，整理好就會通知下單'}
   if(g.st==='整理中')return '整理好就會通知下單';
   return ''}

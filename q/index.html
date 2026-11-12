@@ -113,8 +113,8 @@ function show(d){
     $('yes').onclick=function(){$('yes').disabled=true;call('客_是我').then(function(x){D=x;VIEW==='h'?showHold(x):show(x)}).catch(function(x){$('e').textContent=x.message;$('yes').disabled=false})};
     $('no').onclick=function(){show({bind:'未綁定',name:d.name})};return}
   if(d.bind!=='已綁定'){$('hi').textContent='我的訂單';
-    if(d.bind==='待確認'){$('m').innerHTML='<div class="box"><b>已經收到囉！</b><br>我們確認是你之後，就能在這裡看到訂單，通常一天內會好。</div>';return}
-    $('m').innerHTML='<div class="box"><b>第一次使用，請告訴我們你是誰</b><div class="sub">請打你在「日本扭蛋代購」社群裡的暱稱（只要打一次）</div><input id="nk" placeholder="例：思婕" maxlength="40"><button class="main" id="go">送出</button><div class="err" id="e"></div></div>';
+    if(d.bind==='待確認'){$('m').innerHTML='<div class="box"><b>已經收到您的綁定資料囉！</b><br>小幫手確認後，您就能在這裡看到訂單（通常一天內）。現在還看不到是正常的喔 🙏</div>';return}
+    $('m').innerHTML='<div class="box"><b>第一次使用，請告訴我們你是誰</b><div class="sub">請打你在「日本扭蛋代購」社群裡<b>完整的暱稱</b>，表情符號也要打進去（只要打一次）</div><input id="nk" placeholder="例：思婕🐈" maxlength="40"><button class="main" id="go">送出</button><div class="err" id="e"></div></div>';
     $('go').onclick=function(){var v=$('nk').value.trim();if(!v)return;$('go').disabled=true;call('客_申請',[v]).then(function(x){D=x;show(x)}).catch(function(x){$('e').textContent=x.message;$('go').disabled=false})};return}
   $('hi').textContent=(d.show||'')+' 的訂單';
   var gs=d.groups||[];
@@ -160,10 +160,10 @@ function showW(){var L=W.list||[];
   var h='<div class="box"><b>🌟 想找什麼？許個願吧！</b><div class="sub">大家都看得到，也可以按「我也想要」。小幫手會依大家想要的程度去找喔</div>'+
     '<textarea id="wt" rows="2" placeholder="想要什麼？例：吉伊卡哇 聖誕兔吊飾 粉色"></textarea><input id="wl" placeholder="有連結可以貼這裡（可不填）"><input id="wp" type="file" accept="image/*"><button class="main" id="wgo">許願 🌟</button><div class="err" id="we"></div></div>';
   if(!L.length)h+='<div class="empty">還沒有人許願，當第一個吧！</div>';
-  h+=L.map(function(w){return '<div class="wish"><div class="who">'+esc(w.name)+'・'+md(w.at)+(w.st&&w.st!=='許願中'?'<span class="st">'+esc(w.st)+'</span>':'')+'</div>'+
+  h+=L.map(function(w){return '<div class="wish"><div class="who">'+esc(w.name)+'・'+md(w.at)+(w.st&&w.st!=='許願中'?'<span class="st">小幫手：'+esc(w.st)+'</span>':'')+'</div>'+
     (w.text?'<div style="white-space:pre-wrap;margin-top:4px">'+esc(w.text)+'</div>':'')+(w.link?'<div><a href="'+esc(w.link)+'" target="_blank">🔗 打開連結</a></div>':'')+
     (w.pic?'<img loading="lazy" src="'+pic(w.pic).replace('w400','w800')+'" data-big="'+esc(w.pic)+'" alt="">':'')+
-    '<div class="acts"><button data-want="'+esc(w.id)+'" class="'+(w.me?'on':'')+'">🙋 我也想要（'+w.n+'）</button>'+(w.mine?'<button data-wdel="'+esc(w.id)+'">刪掉</button>':'')+'</div>'+
+    '<div class="acts"><button data-want="'+esc(w.id)+'" class="'+(w.me?'on':'')+'">🙋 我也想要（'+w.n+'）</button>'+(w.n?'<button data-who="'+esc(w.id)+'">看是誰</button>':'')+(w.mine?'<button data-wdel="'+esc(w.id)+'">刪掉</button>':'')+'</div>'+
     (w.msgs.length?'<div class="msgs">'+w.msgs.map(function(m){return '<div>'+(m.staff?'<b>🧡 小幫手</b>':esc(m.name))+'：'+esc(m.text)+'</div>'}).join('')+'</div>':'')+
     '<div class="say"><input data-say="'+esc(w.id)+'" placeholder="留言…" maxlength="200"><button data-send="'+esc(w.id)+'">送出</button></div></div>'}).join('');
   $('m').innerHTML=h;
@@ -178,6 +178,7 @@ document.addEventListener('click',function(e){var t=e.target;
   var wa=t.getAttribute&&t.getAttribute('data-want');if(wa){t.disabled=true;call('客_想要',[wa]).then(function(w){W=w;showW()}).catch(function(x){alert(x.message);t.disabled=false});return}
   var wd=t.getAttribute&&t.getAttribute('data-wdel');if(wd){if(!confirm('刪掉這個願望？'))return;call('客_刪願',[wd]).then(function(w){W=w;showW()}).catch(function(x){alert(x.message)});return}
   var sd=t.getAttribute&&t.getAttribute('data-send');if(sd){var inp=document.querySelector('[data-say="'+sd+'"]');var v=inp.value.trim();if(!v)return;t.disabled=true;call('客_留言',[sd,v]).then(function(w){W=w;showW()}).catch(function(x){alert(x.message);t.disabled=false});return}
+  var wh=t.getAttribute&&t.getAttribute('data-who');if(wh){var ww=(W.list||[]).find(function(x){return x.id===wh});if(ww)alert('🙋 想要的人：\n'+(ww.who||[]).join('、'));return}
   var gh=t.closest&&t.closest('.gh');if(gh){gh.parentNode.classList.toggle('open');return}
   var b=t.getAttribute&&t.getAttribute('data-big');if(b){$('big').querySelector('img').src=pic(b).replace('w400','w1200');$('big').style.display='flex';return}
   if(t.closest&&t.closest('#big'))$('big').style.display='none'});

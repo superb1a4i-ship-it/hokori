@@ -92,7 +92,7 @@ function eta(g){
 function tab(v){VIEW=v;if(v==='w')return loadW();$('m').innerHTML='<div class="empty">讀取中…</div>';call('客_我的').then(function(d){D=d;v==='h'?showHold(d):show(d)}).catch(fail)}
 function grpHtml(g,i){
   var m='商品 '+money(g.rev);if(g.dep>0)m+='　已付訂金 '+money(g.dep);
-  if(g.st==='待下單')m+=g.hold?'<br><span class="tag hold">🔗 已登記併下次</span> 等下一批到再一起下單':'<br><span class="due">要下單 '+money(Math.max(0,g.rev-g.dep))+'</span>';
+  if(g.st==='待下單')m+=g.hold?'<br><span class="tag hold">🔗 已登記併單</span> 等下一批到再一起下單':'<br><span class="due">要下單 '+money(Math.max(0,g.rev-g.dep))+'</span>';
   else if(g.st==='等出貨')m+='<br><span class="ok">已下賣貨便</span>，'+(D&&D.wk2?D.wk2:'通常週四或週五寄出')+'，到門市取貨付款';
   else if(g.st==='出貨')m+='<br><span class="ok">已寄出</span>';
   if(g.ship){var sp=g.ship,dd=sp.due?md(sp.due):'';
@@ -133,7 +133,7 @@ function show(d){
       '<div class="ln"><span>🔢 數量：<b>1</b></span><button class="cp" data-cp="1">複製</button></div>'+
       '<div class="ln"><span>💵 金額：<b>'+fill+'</b></span><button class="cp" data-cp="'+fill+'">複製</button></div>'+
       '<div class="note" style="margin-top:8px">要改宅配（運費 $80）請聯絡小幫手喔</div></div>';}
-  else if(pend.length)h+='<div class="sum">🔗 您登記了併下次，等下一批到了再一起下單 📦</div>';
+  else if(pend.length)h+='<div class="sum">🔗 您登記了併單，等下一批到了再一起下單 📦</div>';
   else h+='<div class="sum">目前沒有要下單的 🙌</div><div class="note" style="color:#8a4b2f;background:#fdf1e7;border-radius:8px;padding:8px 10px;margin:8px 0;line-height:1.6">請勿提早下單，也請不要為了保留免運券先下單 🙏<br>因作業流程是整批整批產出條碼，無法另外挑出還沒到貨的商品，提早下單造成賣貨便過期，無法負責。<br>請一定要收到下單通知後再下單，謝謝配合 💕</div>';
   if(!act.length)h+='<div class="empty">目前沒有進行中的訂單 🙌</div>';
   var mbs={},ci=0;act.forEach(function(g){if(g.mb){mbs[g.mb]=(mbs[g.mb]||0)+1}});
@@ -145,7 +145,7 @@ function show(d){
   if(hist.length)h+='<details class="box"><summary>📜 歷史訂單（已取件 '+hist.length+' 筆）</summary><div style="margin-top:8px">'+hist.map(function(g,i){return grpHtml(g,9)}).join('')+'</div></details>';
   $('m').innerHTML=h;}
 /* 併下次：只列這個人可以併的批次＋併單規則 */
-function showHold(d){if(d.bind!=='已綁定')return show(d);$('hi').textContent='🔗 併下次';$('at').textContent='勾選要一起寄的批次';document.title='併下次｜日本扭蛋代購';
+function showHold(d){if(d.bind!=='已綁定')return show(d);$('hi').textContent='🔗 併單';$('at').textContent='勾選要一起寄的批次';document.title='併單｜日本扭蛋代購';
   var c=(d.groups||[]).filter(function(g){return g.st!=='出貨'&&!g.mb&&!g.pre});var pre=(d.groups||[]).filter(function(g){return g.st!=='出貨'&&!g.mb&&g.pre});
   var h='<div class="box" style="font-size:15px"><b>📌 併單規則</b><div style="margin-top:6px">・最多併一次（累積兩批，寄出後歸零）<br>・併一次約多等 1～2 週<br>・要併的批次都還沒付訂金、而且這批 $300 以上，要先結清這批<br>・要併單的請先不要下單，等收到新通知再一起下單</div></div>';
   if(c.length<2){h+='<div class="empty">'+(c.length?'目前只有一批，沒有可以一起寄的批次，請直接下單喔 🙏':'目前沒有可以併的批次 🙌')+'</div>';$('m').innerHTML=h;return}

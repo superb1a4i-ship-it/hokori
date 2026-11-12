@@ -117,7 +117,7 @@ function show(d){
     $('yes').onclick=function(){$('yes').disabled=true;call('客_是我').then(function(x){D=x;rend(VIEW,x)}).catch(function(x){$('e').textContent=x.message;$('yes').disabled=false})};
     $('no').onclick=function(){show({bind:'未綁定',name:d.name})};return}
   if(d.bind!=='已綁定'){$('hi').textContent='我的訂單';
-    if(d.bind==='待確認'){$('m').innerHTML='<div class="box"><b>已經收到您的綁定資料囉！</b><br>小幫手確認後，您就能在這裡看到訂單（通常一天內）。現在還看不到是正常的喔 🙏</div>';return}
+    if(d.bind==='待確認'){$('m').innerHTML='<div class="box"><b>✅ 已經收到您的綁定資料囉！</b><br>小幫手核對好之後（通常一天內），再按一次下面選單「📦 查我的訂單」就能看到您的訂單囉 🙏<br><span class="note">現在還看不到是正常的，不用再送一次喔</span></div>';return}
     $('m').innerHTML='<div class="box"><b>第一次使用，請告訴我們你是誰</b><div class="sub">請打你在「日本扭蛋代購」社群裡<b>完整的暱稱</b>，表情符號也要打進去（只要打一次）</div><input id="nk" placeholder="例：思婕🐈" maxlength="40"><button class="main" id="go">送出</button><div class="err" id="e"></div></div>';
     $('go').onclick=function(){var v=$('nk').value.trim();if(!v)return;$('go').disabled=true;call('客_申請',[v]).then(function(x){D=x;show(x)}).catch(function(x){$('e').textContent=x.message;$('go').disabled=false})};return}
   $('hi').textContent=(d.show||'')+' 的訂單';

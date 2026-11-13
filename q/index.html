@@ -108,7 +108,7 @@ function grpHtml(g,i){
   var e=eta(g);if(e&&!g.hold)m+='<br>'+esc(e);
   return '<div class="grp'+(i<2&&g.st!=='出貨'?' open':'')+'"><div class="gh"><span class="lab">'+esc(g.lab)+'</span><span class="st">'+esc(g.t)+'</span></div><div class="money">'+m+'</div><div class="items">'+
     g.items.map(function(r){return '<div class="it">'+(r.pic?'<img loading="lazy" src="'+pic(r.pic)+'" data-big="'+esc(r.pic)+'" alt="">':'<div class="nopic">沒照片</div>')+
-      '<div class="n">'+esc(r.n)+(r.short?'<span class="tag short">還在確認</span>':'')+(r.kuji?'<span class="tag hold">⚖️ 國際運費還沒秤重</span>':'')+'</div><div class="p">×'+r.q+'<br>'+money(r.sub)+'</div></div>'}).join('')+
+      '<div class="n">'+esc(r.n)+(r.short?'<span class="tag short">還在確認</span>':'')+(r.kuji?'<span class="tag hold">⚖️ 國際運費還沒秤重</span>':'')+(r.wt?'<span class="tag" style="background:#eef3f8;color:#3b5b7a">⚖️ '+r.wt+'g 以下</span>':'')+'</div><div class="p">×'+r.q+'<br>'+money(r.sub)+'</div></div>'}).join('')+
     (g.fees||[]).map(function(f){return '<div class="it"><div class="nopic">費用</div><div class="n">'+esc(f.n)+'</div><div class="p">'+money(f.sub)+'</div></div>'}).join('')+'</div></div>'}
 var COLORS=['#d9822b','#3b82c4','#8e5bc7','#2f9e6a','#c2477a'];
 function show(d){

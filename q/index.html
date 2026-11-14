@@ -131,13 +131,13 @@ function show(d){
   if(pend.length){var amt=pend.reduce(function(a,g){return a+g.rev-g.dep},0);var fill=amt<20?20:amt,back=amt<20?20-amt:0;
     h+='<div class="sum">🧾 這次要下單：<b>'+money(Math.max(amt,0))+'</b></div>'+(!free.length&&act.some(function(g){return g.st!=='待下單'&&g.st!=='出貨'&&g.st!=='等出貨'&&!g.mb&&!g.pre})?'<div class="note" style="margin:-4px 0 8px;color:#8a5a00">🔗 您有登記併單，下一批次還未到貨 📦 要先下的話，照下面的金額下單就好</div>':'');
     h+='<div class="order"><h3>🛒 這次要下的是：'+esc(pend.map(function(g){return g.lab}).join('、'))+'</h3>'+
-      (d.wk?'<div class="note" style="margin:6px 0;color:#8a4b2f">📦 '+d.wk+'</div>':'')+'<div class="note" style="margin:6px 0">請照下面這個金額填寫就好 🙏（之後又有批次到台灣，再按一次「我要下單」，金額會自動更新）</div>'+
+      (d.wk?'<div class="note" style="margin:6px 0;color:#8a4b2f">📦 '+d.wk+'</div>':'')+'<div class="note" style="margin:6px 0">請照下面格式填寫，請注意填錯會找不到人 🙏</div>'+
       (back?'<div class="note" style="color:#a32d2d">💌 賣貨便最低要填 $20，多付的 '+money(back)+' 我們會放在包裹裡退給您</div>':'')+
       '<a class="go" href="'+SHOP+'" target="_blank">🌱 打開自填單賣場</a><div class="note">照這樣填 👇（按「複製」再貼到賣貨便）</div>'+
       '<div class="ln"><span>📝 商品名稱：<b>'+esc(d.c)+'</b></span><button class="cp" data-cp="'+esc(d.c)+'">複製</button></div>'+
       '<div class="ln"><span>🔢 數量：<b>1</b></span><button class="cp" data-cp="1">複製</button></div>'+
       '<div class="ln"><span>💵 金額：<b>'+fill+'</b></span><button class="cp" data-cp="'+fill+'">複製</button></div>'+
-      '<div class="note" style="margin-top:8px">要改宅配（運費 $80）請聯絡小幫手喔</div></div>';}
+      '<div class="note" style="margin-top:8px">要改宅配（運費 $80）請聯絡小幫手</div></div>';}
   else if(pend.length)h+='<div class="sum">🔗 您登記了併單，等下一批到了再一起下單 📦</div>';
   else h+='<div class="sum">目前沒有要下單的 🙌</div>';
   if(!act.length)h+='<div class="empty">目前沒有進行中的訂單 🙌</div>';

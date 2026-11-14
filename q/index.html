@@ -155,7 +155,7 @@ function showHold(d){if(d.bind!=='已綁定')return show(d);$('hi').textContent=
   var od=function(k){return k==='未送集運'?'9999':(/^\d{4}-/.test(k)?k:'9998')};var by=function(a,b){return od(a.k)<od(b.k)?-1:1};
   var now=c.filter(function(g){return g.st==='待下單'}).sort(by),next=c.filter(function(g){return g.st!=='待下單'}).sort(by)[0];if(next&&next.k==='未送集運')next=Object.assign({},next,{lab:'還在日本的那批'});
   var L=function(a){return esc(a.map(function(g){return g.lab}).join('＋'))};
-  var h='<div class="box" style="font-size:15px"><b>📌 併單規則</b><div style="margin-top:6px;line-height:1.8">・最多併一次（累積兩批，寄出後歸零）<br>・併一次約多等 1～2 週<br>・已經到台灣的批次，會自動算在同一張單，不用併<br>・併單＝已到的先不下單，等<b>還沒到的下一批</b>（只能等最近的那一批）<br>・要併的批次都還沒付訂金、而且已到的合計 $300 以上，要先結清<br>・登記後想先下單也可以，直接按「🛒 我要下單」；如果下一批剛好也到了，會自動一起算</div></div>';
+  var h='<div class="box" style="font-size:15px"><b>📌 併單規則</b><div style="margin-top:6px;line-height:1.8">・最多併一次（累積兩批，寄出後歸零）<br>・併一次約多等 1～2 週<br>・只能等最近的下一批，不能跳批<br>・<b>要併單請先不要下單，下單就會馬上出貨</b><br>・要併的批次超過 $300、還沒付訂金，需要先結清<br>・要下單請直接按「🛒 我要下單」，金額會自動合併</div></div>';
   if(pre.length)h+='<div class="note" style="margin:0 2px 8px">預購單不能併：'+L(pre)+'</div>';
   if(now.length&&now.every(function(g){return g.hold})){h+='<div class="box"><b>✅ 已登記併單</b><div style="margin-top:8px;line-height:1.7">'+L(now)+(next?' ＋ '+esc(next.lab):'')+'<br>會等'+(next?esc(next.lab):'下一批')+'到了再一起寄，到時候會通知您下單 📦</div><button class="main" id="hcancel" style="margin-top:12px;background:#e8e2da;color:#2a2622">取消併單</button><div class="err" id="he"></div></div>';$('m').innerHTML=h;return}
   if(now.some(function(g){return g.hold})){h+='<div class="empty">您已經併過一次了，等的那批也到台灣了 📦<br>已到的 '+L(now)+' 會一起下單，請直接按「🛒 我要下單」喔 🙏<br>（最多只能併一次）</div>';$('m').innerHTML=h;return}

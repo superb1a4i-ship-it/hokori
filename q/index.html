@@ -89,7 +89,7 @@ function eta(g){
   if(g.st==='集運'&&/^\d{4}-\d{2}-\d{2}$/.test(g.k)){var d=addDays(g.k,14);return d>=todayS()?'預計 '+md(d)+' 那週通知下單':'快到囉，整理好就會通知下單'}
   if(g.st==='整理中')return '整理好就會通知下單';
   return ''}
-function tab(v){VIEW=v;if(v==='w')return loadW();if(v==='f')return loadF();var ck='hokoriMe'+(asTest?'T':''),old=null;try{old=JSON.parse(localStorage.getItem(ck)||'null')}catch(e){}
+function tab(v){VIEW=v;if(v==='w')return loadW();if(v==='f')return loadF();if(v==='s')return loadS();var ck='hokoriMe'+(asTest?'T':''),old=null;try{old=JSON.parse(localStorage.getItem(ck)||'null')}catch(e){}
   if(v==='b')old=null; /* 綁定頁一定要看最新的，不先顯示上次的 */
   if(old&&old.bind==='已綁定'){D=old;rend(v,old);$('at').textContent='更新中…（先顯示上次看到的）'}else $('m').innerHTML='<div class="empty">讀取中…</div>';
   call('客_我的').then(function(d){D=d;try{localStorage.setItem(ck,JSON.stringify(d))}catch(e){}if(VIEW!==v)return;rend(v,d)}).catch(function(x){if(old&&old.bind==='已綁定')$('at').textContent='更新失敗，顯示的是上次的資料';else fail(x)})}
@@ -166,6 +166,8 @@ function showHold(d){if(d.bind!=='已綁定')return show(d);$('hi').textContent=
     '<button class="main" id="hgo" style="margin-top:12px">等 '+esc(next.lab)+' 一起寄</button><div class="err" id="he"></div></div>';
   $('m').innerHTML=h;}
 function rend(v,d){v==='h'?showHold(d):v==='b'?showBind(d):show(d)}
+/* 出清區：還在準備中（妮妮 11/15：選單先空出來，後台用好再上） */
+function loadS(){$('hi').textContent='🛍️ 出清區';document.title='出清區｜日本扭蛋代購';$('at').textContent='';$('m').innerHTML='<div class="box" style="text-align:center;padding:28px 16px"><div style="font-size:40px">🛍️</div><b style="font-size:17px">出清區還在準備中</b><div class="note" style="margin-top:8px;line-height:1.7">之後現貨、出清商品會放在這裡，<br>按進來就能直接搶 🙌<br>上線時會在社群通知，敬請期待！</div></div>'}
 /* 綁定帳號 */
 function showBind(d){if(d.bind!=='已綁定'){show(d);$('hi').textContent='🔗 綁定帳號';return}
   $('hi').textContent='🔗 綁定帳號';$('at').textContent='';$('m').innerHTML='<div class="box"><b>✅ 已經綁定好囉</b><div style="margin-top:8px;line-height:1.7">社群暱稱：<b>'+esc(d.show||d.c)+'</b><br>按下面選單「📦 查我的訂單」就能看訂單、貨態；「🛒 我要下單」會告訴您這次要下多少。</div><div class="note" style="margin-top:8px">名字不對的話，請直接傳訊息給小幫手喔</div></div>'}
@@ -202,12 +204,12 @@ document.addEventListener('click',function(e){var t=e.target;
   var b=t.getAttribute&&t.getAttribute('data-big');if(b){$('big').querySelector('img').src=pic(b).replace('w400','w1200');$('big').style.display='flex';return}
   if(t.closest&&t.closest('#big'))$('big').style.display='none'});
 function fail(x){$('m').innerHTML='<div class="box err">'+esc(x.message||x)+'</div>'}
-(function(){var q=new URLSearchParams(location.search);asTest=q.get('as')||'';var pp=q.get('p');var start=pp==='wish'?'w':pp==='hold'?'h':pp==='faq'?'f':pp==='bind'?'b':'o';
+(function(){var q=new URLSearchParams(location.search);asTest=q.get('as')||'';var pp=q.get('p');var start=pp==='wish'?'w':pp==='hold'?'h':pp==='faq'?'f':pp==='bind'?'b':pp==='sale'?'s':'o';
   var go=function(){tab(start)};
   if(asTest){go();return}
   if(!window.liff||LIFF.indexOf('%')===0){fail('請從「日本扭蛋代購」官方賴下面的選單打開');return}
   try{var o0=JSON.parse(localStorage.getItem('hokoriMe')||'null');if(o0&&o0.bind==='已綁定'&&(start==='o'||start==='h')){D=o0;VIEW=start;start==='h'?showHold(o0):show(o0);$('at').textContent='更新中…（先顯示上次看到的）'}}catch(e){}
-  liff.init({liffId:LIFF}).then(function(){if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return}idt=liff.getIDToken();q=new URLSearchParams(location.search);pp=q.get('p');start=pp==='wish'?'w':pp==='hold'?'h':pp==='faq'?'f':pp==='bind'?'b':'o';go()}).catch(fail)})();
+  liff.init({liffId:LIFF}).then(function(){if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return}idt=liff.getIDToken();q=new URLSearchParams(location.search);pp=q.get('p');start=pp==='wish'?'w':pp==='hold'?'h':pp==='faq'?'f':pp==='bind'?'b':pp==='sale'?'s':'o';go()}).catch(fail)})();
 </script>
 </body>
 </html>

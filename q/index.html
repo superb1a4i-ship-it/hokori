@@ -150,17 +150,20 @@ function show(d){
   if(hist.length)h+='<details class="box"><summary>📜 歷史訂單（已取件 '+hist.length+' 筆）</summary><div style="margin-top:8px">'+hist.map(function(g,i){return grpHtml(g,9)}).join('')+'</div></details>';
   $('m').innerHTML=h;}
 /* 併下次：只列這個人可以併的批次＋併單規則 */
-function showHold(d){if(d.bind!=='已綁定')return show(d);$('hi').textContent='🔗 併單';$('at').textContent='勾選要一起寄的批次';document.title='併單｜日本扭蛋代購';
+function showHold(d){if(d.bind!=='已綁定')return show(d);$('hi').textContent='🔗 併單';$('at').textContent='等還在日本的下一批，一起寄';document.title='併單｜日本扭蛋代購';
   var c=(d.groups||[]).filter(function(g){return g.st!=='出貨'&&!g.mb&&!g.pre});var pre=(d.groups||[]).filter(function(g){return g.st!=='出貨'&&!g.mb&&g.pre});
-  var h='<div class="box" style="font-size:15px"><b>📌 併單規則</b><div style="margin-top:6px">・最多併一次（累積兩批，寄出後歸零）<br>・併一次約多等 1～2 週<br>・要併的批次都還沒付訂金、而且這批 $300 以上，要先結清這批<br>・要併單的請先不要下單，等收到新通知再一起下單</div></div>';
-  if(c.length<2){h+='<div class="empty">'+(c.length?'目前只有一批，沒有可以一起寄的批次，請直接下單喔 🙏':'目前沒有可以併的批次 🙌')+'</div>';$('m').innerHTML=h;return}
-  var held=c.filter(function(g){return g.hold});
-  if(held.length){var rest=c.filter(function(g){return !g.hold});h+='<div class="box"><b>✅ 已登記併單</b><div style="margin-top:8px;line-height:1.7">'+esc(held.map(function(g){return g.lab}).join('、'))+(rest.length?' ＋ '+esc(rest.map(function(g){return g.lab}).join('、')):'')+'<br>會等下一批到了再一起寄，到時候會通知您下單 📦</div><button class="main" id="hcancel" style="margin-top:12px;background:#e8e2da;color:#2a2622">取消併單</button><div class="err" id="he"></div></div>';$('m').innerHTML=h;return}
-  h+='<div class="box"><b>請勾要一起寄的兩批</b><div class="note" style="margin:4px 0 6px">只能勾相鄰的兩批，中間不能跳過一批。例：勾「這批」＋「下一批（還在日本的）」，就會等那批到了再一起寄</div>'+
-    (held.length?'<div class="note" style="color:#8a5a00;margin-bottom:6px">已登記併單：'+esc(held.map(function(g){return g.lab}).join('、'))+'</div>':'')+
-    (pre.length?'<div class="note" style="margin-bottom:6px">預購單不能併：'+esc(pre.map(function(g){return g.lab}).join('、'))+'</div>':'')+
-    c.map(function(g){return '<label style="display:flex;gap:10px;align-items:center;padding:10px 0;border-bottom:1px dashed var(--line)"><input type="checkbox" class="hk" value="'+esc(g.k)+'"'+(g.hold?' checked':'')+' style="width:24px;height:24px;flex:none"><span style="flex:1"><b>'+esc(g.lab)+'</b>　'+esc(g.t)+'<br><span class="note">商品 '+money(g.rev)+(g.dep>0?'・已付訂金 '+money(g.dep):'・還沒付訂金')+'</span></span></label>'}).join('')+
-    '<button class="main" id="hgo" style="margin-top:12px">送出併單</button><div class="err" id="he"></div></div>';
+  var od=function(k){return k==='未送集運'?'9999':(/^\d{4}-/.test(k)?k:'9998')};var by=function(a,b){return od(a.k)<od(b.k)?-1:1};
+  var now=c.filter(function(g){return g.st==='待下單'}).sort(by),next=c.filter(function(g){return g.st!=='待下單'}).sort(by)[0];if(next&&next.k==='未送集運')next=Object.assign({},next,{lab:'還在日本的那批'});
+  var L=function(a){return esc(a.map(function(g){return g.lab}).join('＋'))};
+  var h='<div class="box" style="font-size:15px"><b>📌 併單規則</b><div style="margin-top:6px">・已經到台灣的批次，會自動算在同一張單，不用併<br>・併單＝已到的先不下單，等<b>還在日本的下一批</b>到了再一起寄<br>・只能等最近的下一批，約多等 1～2 週<br>・都還沒付訂金、而且已到的合計 $300 以上，要先結清<br>・要併單的請先不要下單，等收到新通知再一起下單</div></div>';
+  if(pre.length)h+='<div class="note" style="margin:0 2px 8px">預購單不能併：'+L(pre)+'</div>';
+  if(now.length&&now.every(function(g){return g.hold})){h+='<div class="box"><b>✅ 已登記併單</b><div style="margin-top:8px;line-height:1.7">'+L(now)+(next?' ＋ '+esc(next.lab):'')+'<br>會等'+(next?esc(next.lab):'下一批')+'到了再一起寄，到時候會通知您下單 📦</div><button class="main" id="hcancel" style="margin-top:12px;background:#e8e2da;color:#2a2622">取消併單</button><div class="err" id="he"></div></div>';$('m').innerHTML=h;return}
+  if(now.some(function(g){return g.hold})){h+='<div class="empty">您已經併過一次了，等的那批也到台灣了 📦<br>已到的 '+L(now)+' 會一起下單，請直接按「🛒 我要下單」喔 🙏<br>（最多只能併一次）</div>';$('m').innerHTML=h;return}
+  if(!now.length){h+='<div class="empty">目前沒有已經到台灣的批次，不用併單喔 🙌</div>';$('m').innerHTML=h;return}
+  if(!next){h+='<div class="empty">已到台灣的 '+L(now)+' 會一起下單，<br>目前沒有還在日本的批次可以等，請直接下單喔 🙏</div>';$('m').innerHTML=h;return}
+  h+='<div class="box"><b>要不要等下一批一起寄？</b><div style="margin-top:8px;line-height:1.8">✅ 已到台灣：<b>'+L(now)+'</b><br>⏳ 要等的：<b>'+esc(next.lab)+'</b>　'+esc(next.t)+'</div>'+
+    '<div class="note" style="margin-top:6px">按下去後，'+esc(next.lab)+' 到台灣會通知您，到時候全部一起下單</div>'+
+    '<button class="main" id="hgo" style="margin-top:12px">等 '+esc(next.lab)+' 一起寄</button><div class="err" id="he"></div></div>';
   $('m').innerHTML=h;}
 function rend(v,d){v==='h'?showHold(d):v==='b'?showBind(d):show(d)}
 /* 綁定帳號 */
@@ -189,8 +192,7 @@ function shrink(f){return new Promise(function(ok,bad){var r=new FileReader();r.
 document.addEventListener('click',function(e){var t=e.target;
   if(t.className==='hk'){var on=document.querySelectorAll('.hk:checked');if(on.length>2){t.checked=false;alert('最多只能勾兩批（併一次）')}return}
   if(t.id==='hcancel'){if(!confirm('確定要取消併單嗎？'))return;t.disabled=true;call('客_取消併單',[]).then(function(r){alert(r.msg);D=r.me;showHold(D)}).catch(function(x){$('he').textContent=x.message;t.disabled=false});return}
-  if(t.id==='hgo'){var ks=[].map.call(document.querySelectorAll('.hk:checked'),function(x){return x.value});if(ks.length<2){$('he').textContent='請勾兩批：現在這批＋要一起寄的那批';return}
-    t.disabled=true;call('客_併單',[ks]).then(function(r){alert(r.msg);D=r.me;showHold(D)}).catch(function(x){$('he').textContent=x.message;t.disabled=false});return}
+  if(t.id==='hgo'){t.disabled=true;call('客_併單',[]).then(function(r){alert(r.msg);D=r.me;showHold(D)}).catch(function(x){$('he').textContent=x.message;t.disabled=false});return}
   var cp=t.getAttribute&&t.getAttribute('data-cp');if(cp!=null){(navigator.clipboard?navigator.clipboard.writeText(cp):Promise.reject()).then(function(){t.textContent='已複製 ✓'}).catch(function(){prompt('長按複製：',cp)});return}
   var wa=t.getAttribute&&t.getAttribute('data-want');if(wa){t.disabled=true;call('客_想要',[wa]).then(function(w){W=w;showW()}).catch(function(x){alert(x.message);t.disabled=false});return}
   var wd=t.getAttribute&&t.getAttribute('data-wdel');if(wd){if(!confirm('刪掉這個願望？'))return;call('客_刪願',[wd]).then(function(w){W=w;showW()}).catch(function(x){alert(x.message)});return}

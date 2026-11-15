@@ -132,7 +132,7 @@ function show(d){
   var free=pend.filter(function(g){return !g.hold});
   var h='<div class="note" style="color:#8a4b2f;background:#fdf1e7;border-radius:8px;padding:8px 10px;margin:0 0 10px;line-height:1.6">還沒收到下單通知前，請不要為了保留免運券提早下單 🙏<br>因作業流程為整批產出條碼，無法另外挑出還沒到貨的商品，提早下單造成賣貨便條碼過期，無法負責請見諒</div>';
   var hw=act.filter(function(g){return g.st==='待付款'});
-  if(hw.length){var ha=hw.reduce(function(a,g){return a+Math.max(0,g.rev-g.dep)},0);h+='<div class="sum">🚚 已改宅配（'+esc(hw.map(function(g){return g.lab}).join('、'))+'）<br>請匯款付清：<b class="due">'+money(ha)+'</b></div><div class="box" style="line-height:1.7">'+(d.bankT?esc(d.bankT).replace(/\n/g,'<br>')+'<br><br>':'')+'匯完請在官方賴傳<b>後五碼或截圖</b>給我們，確認收到後就會安排寄出 📦<div class="note" style="margin-top:6px">要改收件資料或取消宅配，請聯絡小幫手</div></div>'}
+  if(hw.length){var ha=hw.reduce(function(a,g){return a+Math.max(0,g.rev-g.dep)},0);h+='<div class="sum">🚚 已改宅配（'+esc(hw.map(function(g){return g.lab}).join('、'))+'）<br>宅配需要先付清尾款，請匯款：<b class="due">'+money(ha)+'</b></div><div class="box" style="line-height:1.7">'+(d.bankT?esc(d.bankT).replace(/\n/g,'<br>')+'<br><br>':'')+'<b>宅配需要先付清尾款</b>才會寄出喔 🙏<br>匯完請在官方賴傳<b>後五碼或截圖</b>給我們，確認收到後就會安排寄出 📦<div class="note" style="margin-top:6px">要改收件資料或取消宅配，請聯絡小幫手</div></div>'}
   if(pend.length){var amt=pend.reduce(function(a,g){return a+g.rev-g.dep},0);var fill=amt<20?20:amt,back=amt<20?20-amt:0;
     h+='<div class="sum">🧾 這次要下單：<b>'+money(Math.max(amt,0))+'</b></div>'+(!free.length&&act.some(function(g){return g.st!=='待下單'&&g.st!=='出貨'&&g.st!=='等出貨'&&!g.mb&&!g.pre})?'<div class="note" style="margin:-4px 0 8px;color:#8a5a00">🔗 您有登記併單，下一批次還未到貨 📦 要先下的話，照下面的金額下單就好</div>':'');
     h+='<div class="order"><h3>🛒 這次要下的是：'+esc(pend.map(function(g){return g.lab}).join('、'))+'</h3>'+

@@ -173,9 +173,10 @@ function loadS(){$('hi').textContent='🛍️ 出清區';document.title='出清�
 function showBind(d){if(d.bind!=='已綁定'){show(d);$('hi').textContent='🔗 綁定帳號';return}
   $('hi').textContent='🔗 綁定帳號';$('at').textContent='';$('m').innerHTML='<div class="box"><b>✅ 已經綁定好囉</b><div style="margin-top:8px;line-height:1.7">社群暱稱：<b>'+esc(d.show||d.c)+'</b><br>按下面選單「📦 查我的訂單」就能看訂單、貨態；「🛒 我要下單」會告訴您這次要下多少。</div><div class="note" style="margin-top:8px">名字不對的話，請直接傳訊息給小幫手喔</div></div>'}
 /* 購前須知／常見問題：一題一行，點開才看答案 */
+function lk(h){return h.replace(/https?:\/\/[^\s<"]+/g,function(u){return '<a href="'+u.replace(/&amp;/g,'&')+'" target="_blank" rel="noopener" style="color:#c2477a;font-weight:600">點我打開 🔗</a>'})} /* 妮妮 11/15：網址直接可以按 */
 function loadF(){$('hi').textContent='📢 購前須知／常見問題';document.title='購前須知／常見問題｜日本扭蛋代購';$('at').textContent='點題目看答案';$('m').innerHTML='<div class="empty">讀取中…</div>';
   call('客_常見問題').then(function(L){if(!L.length){$('m').innerHTML='<div class="empty">還沒有整理常見問題，請直接傳訊息問小幫手喔 🙏</div>';return}
-    $('m').innerHTML=L.map(function(q,i){return '<details class="box"'+(i===0&&/購前須知/.test(q.t)?' open':'')+'><summary style="font-weight:600;font-size:16px;cursor:pointer">'+esc(q.t)+'</summary><div style="white-space:pre-wrap;margin-top:8px;line-height:1.7">'+esc(q.a)+'</div></details>'}).join('')+'<div class="note" style="text-align:center;margin:10px 0">找不到答案的話，直接傳訊息問小幫手喔 🙏</div>'}).catch(fail)}
+    $('m').innerHTML=L.map(function(q,i){return '<details class="box"'+(i===0&&/購前須知/.test(q.t)?' open':'')+'><summary style="font-weight:600;font-size:16px;cursor:pointer">'+esc(q.t)+'</summary><div style="white-space:pre-wrap;margin-top:8px;line-height:1.7;overflow-wrap:anywhere">'+lk(esc(q.a))+'</div></details>'}).join('')+'<div class="note" style="text-align:center;margin:10px 0">找不到答案的話，直接傳訊息問小幫手喔 🙏</div>'}).catch(fail)}
 /* 許願池 */
 function loadW(){$('hi').textContent='🌟 許願池';document.title='許願池｜日本扭蛋代購';$('at').textContent='想找什麼都可以許願，大家都看得到';$('m').innerHTML='<div class="empty">讀取中…</div>';call('客_許願清單').then(function(w){W=w;showW()}).catch(fail)}
 function showW(){var L=W.list||[];

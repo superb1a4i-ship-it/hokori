@@ -77,8 +77,8 @@ var API='https://script.google.com/macros/s/AKfycbwbCxq0ZAKj0Gcgb1guRp7CB_xROFBn
 var $=function(i){return document.getElementById(i)};
 function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function money(n){return '$'+Number(n||0).toLocaleString()}
-var idt='',asTest='',VIEW='o',D=null,W=null,START='o';
-function call(fn,args){var b={fn:fn,args:args||[]};if(asTest){b.as=asTest;b.asName=asTest;b.k=localStorage.getItem('hokoriKey')||''}else b.idt=idt;
+var idt='',asTest='',asC='',VIEW='o',D=null,W=null,START='o';
+function call(fn,args){var b={fn:fn,args:args||[]};if(asTest){b.as=asTest;b.asName=asTest;b.asC=asC;b.k=localStorage.getItem('hokoriKey')||''}else b.idt=idt;
   return fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify(b)}).then(function(r){return r.json()}).then(function(j){if(j.err)throw new Error(j.err);return j.r})}
 function pic(id){return id?'https:\/\/drive.google.com\/thumbnail?id='+encodeURIComponent(id)+'&sz=w400':''}
 function md(s){return s?(+s.slice(5,7))+'/'+(+s.slice(8,10)):''}
@@ -204,7 +204,7 @@ document.addEventListener('click',function(e){var t=e.target;
   var b=t.getAttribute&&t.getAttribute('data-big');if(b){$('big').querySelector('img').src=pic(b).replace('w400','w1200');$('big').style.display='flex';return}
   if(t.closest&&t.closest('#big'))$('big').style.display='none'});
 function fail(x){$('m').innerHTML='<div class="box err">'+esc(x.message||x)+'</div>'}
-(function(){var q=new URLSearchParams(location.search);asTest=q.get('as')||'';var pp=q.get('p');var start=pp==='wish'?'w':pp==='hold'?'h':pp==='faq'?'f':pp==='bind'?'b':pp==='sale'?'s':'o';
+(function(){var q=new URLSearchParams(location.search);asTest=q.get('as')||'';asC=q.get('c')||'';if(asTest&&!localStorage.getItem('hokoriKey')){var kk=prompt('請輸入工作台通行碼（只要一次）');if(kk)localStorage.setItem('hokoriKey',kk.trim())}if(asC)document.body.insertAdjacentHTML('afterbegin','<div style="background:#fff3cd;padding:6px 12px;font-size:13px">👀 小幫手預覽：「'+esc(asC)+'」看到的畫面（只能看）</div>');var pp=q.get('p');var start=pp==='wish'?'w':pp==='hold'?'h':pp==='faq'?'f':pp==='bind'?'b':pp==='sale'?'s':'o';
   var go=function(){tab(start)};
   if(asTest){go();return}
   if(!window.liff||LIFF.indexOf('%')===0){fail('請從「日本扭蛋代購」官方賴下面的選單打開');return}

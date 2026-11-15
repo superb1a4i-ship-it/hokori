@@ -97,6 +97,8 @@ function tab(v){VIEW=v;if(v==='w')return loadW();if(v==='f')return loadF();if(v=
 function grpHtml(g,i){
   var m='商品 '+money(g.rev);if(g.dep>0)m+='　已付訂金 '+money(g.dep);
   if(g.st==='待下單')m+=g.hold?'<br><span class="tag hold">🔗 已登記併單</span> 等下一批到再一起下單':'<br><span class="due">要下單 '+money(Math.max(0,g.rev-g.dep))+'</span>';
+  else if(g.st==='待付款')m+='<br><span class="due">🚚 已改宅配，待匯款 '+money(Math.max(0,g.rev-g.dep))+'</span>';
+  else if(g.st==='等出貨'&&/^宅配/.test(g.mb||''))m+='<br><span class="ok">🚚 宅配已付清</span>，'+(D&&D.wk2?D.wk2:'通常週五寄出')+'，會寄到您家';
   else if(g.st==='等出貨')m+='<br><span class="ok">已下賣貨便</span>，'+(D&&D.wk2?D.wk2:'通常週五寄出，請留意簡訊')+'，到門市取貨付款';
   else if(g.st==='出貨')m+='<br><span class="ok">已寄出</span>';
   if(g.ship){var sp=g.ship,dd=sp.due?md(sp.due):'';
@@ -110,7 +112,7 @@ function grpHtml(g,i){
   return '<div class="grp'+(i<2&&g.st!=='出貨'?' open':'')+'"><div class="gh"><span class="lab">'+esc(g.lab)+'</span><span class="st">'+esc(g.t)+'</span></div><div class="money">'+m+'</div><div class="items">'+
     g.items.map(function(r){return '<div class="it">'+(r.pic?'<img loading="lazy" src="'+pic(r.pic)+'" data-big="'+esc(r.pic)+'" alt="">':'<div class="nopic">沒照片</div>')+
       '<div class="n">'+esc(r.n)+(r.short?'<span class="tag short">還在確認</span>':'')+(r.kuji?'<span class="tag hold">⚖️ 國際運費還沒秤重</span>':'')+(r.wt?'<span class="tag" style="background:#eef3f8;color:#3b5b7a">⚖️ '+r.wt+'g 以下</span>':'')+'</div><div class="p">×'+r.q+'<br>'+money(r.sub)+'</div></div>'}).join('')+
-    (g.fees||[]).map(function(f){return '<div class="it"><div class="nopic">費用</div><div class="n">'+esc(f.n)+(f.note?'<div style="font-size:12px;color:#8a7f74;font-weight:400;margin-top:2px">'+esc(f.note)+'</div>':'')+'</div><div class="p">'+money(f.sub)+'</div></div>'}).join('')+'</div></div>'}
+    (g.fees||[]).map(function(f){return '<div class="it"><div class="nopic">費用</div><div class="n">'+esc(/^金額調整[｜|]./.test(f.n)?f.n.replace(/^金額調整[｜|]\s*/,''):f.n)+(f.note&&!/^金額調整/.test(f.n)?'<div style="font-size:12px;color:#8a7f74;font-weight:400;margin-top:2px">'+esc(f.note)+'</div>':'')+'</div><div class="p">'+money(f.sub)+'</div></div>'}).join('')+'</div></div>'}
 var COLORS=['#d9822b','#3b82c4','#8e5bc7','#2f9e6a','#c2477a'];
 function show(d){
   $('at').textContent=d.at?('資料更新：'+lt(d.at)+'（有變動約 15 分鐘內更新）'):'';
@@ -129,6 +131,8 @@ function show(d){
   var pend=act.filter(function(g){return g.st==='待下單'&&!g.mb});
   var free=pend.filter(function(g){return !g.hold});
   var h='<div class="note" style="color:#8a4b2f;background:#fdf1e7;border-radius:8px;padding:8px 10px;margin:0 0 10px;line-height:1.6">還沒收到下單通知前，請不要為了保留免運券提早下單 🙏<br>因作業流程為整批產出條碼，無法另外挑出還沒到貨的商品，提早下單造成賣貨便條碼過期，無法負責請見諒</div>';
+  var hw=act.filter(function(g){return g.st==='待付款'});
+  if(hw.length){var ha=hw.reduce(function(a,g){return a+Math.max(0,g.rev-g.dep)},0);h+='<div class="sum">🚚 已改宅配（'+esc(hw.map(function(g){return g.lab}).join('、'))+'）<br>請匯款付清：<b class="due">'+money(ha)+'</b></div><div class="box" style="line-height:1.7">'+(d.bankT?esc(d.bankT).replace(/\n/g,'<br>')+'<br><br>':'')+'匯完請在官方賴傳<b>後五碼或截圖</b>給我們，確認收到後就會安排寄出 📦<div class="note" style="margin-top:6px">要改收件資料或取消宅配，請聯絡小幫手</div></div>'}
   if(pend.length){var amt=pend.reduce(function(a,g){return a+g.rev-g.dep},0);var fill=amt<20?20:amt,back=amt<20?20-amt:0;
     h+='<div class="sum">🧾 這次要下單：<b>'+money(Math.max(amt,0))+'</b></div>'+(!free.length&&act.some(function(g){return g.st!=='待下單'&&g.st!=='出貨'&&g.st!=='等出貨'&&!g.mb&&!g.pre})?'<div class="note" style="margin:-4px 0 8px;color:#8a5a00">🔗 您有登記併單，下一批次還未到貨 📦 要先下的話，照下面的金額下單就好</div>':'');
     h+='<div class="order"><h3>🛒 這次要下的是：'+esc(pend.map(function(g){return g.lab}).join('、'))+'</h3>'+
@@ -138,9 +142,9 @@ function show(d){
       '<div class="ln"><span>📝 商品名稱：<b>'+esc(d.c)+'</b></span><button class="cp" data-cp="'+esc(d.c)+'">複製</button></div>'+
       '<div class="ln"><span>🔢 數量：<b>1</b></span><button class="cp" data-cp="1">複製</button></div>'+
       '<div class="ln"><span>💵 金額：<b>'+fill+'</b></span><button class="cp" data-cp="'+fill+'">複製</button></div>'+
-      '<div class="note" style="margin-top:8px">要改宅配（運費 $80）請聯絡小幫手</div></div>';}
+      '<button class="main" id="home" style="margin-top:12px;background:#eef3f8;color:#2a4a6a">🚚 改宅配（'+(pend.reduce(function(a,g){return a+g.rev},0)>8000?'這次免運':'運費 $80')+'）</button><div id="homeBox"></div></div>';}
   else if(pend.length)h+='<div class="sum">🔗 您登記了併單，等下一批到了再一起下單 📦</div>';
-  else h+='<div class="sum">目前沒有要下單的 🙌</div>';
+  else if(!hw.length)h+='<div class="sum">目前沒有要下單的 🙌</div>';
   if(!act.length)h+='<div class="empty">目前沒有進行中的訂單 🙌</div>';
   var mbs={},ci=0;act.forEach(function(g){if(g.mb){mbs[g.mb]=(mbs[g.mb]||0)+1}});
   var done={};act.forEach(function(g,i){
@@ -149,7 +153,19 @@ function show(d){
     h+=grpHtml(g,i)});
 
   if(hist.length)h+='<details class="box"><summary>📜 歷史訂單（已取件 '+hist.length+' 筆）</summary><div style="margin-top:8px">'+hist.map(function(g,i){return grpHtml(g,9)}).join('')+'</div></details>';
-  $('m').innerHTML=h;}
+  $('m').innerHTML=h;if($('home'))$('home').onclick=homeAsk;}
+/* 改宅配（妮妮 11/16）：先拿上次的收件資料，一樣就按確定，不一樣按更換 */
+function homeAsk(){var bx=$('homeBox');$('home').disabled=true;bx.innerHTML='<div class="note" style="margin-top:8px">讀取中…</div>';
+  call('客_改宅配',[{ask:1}]).then(function(x){$('home').style.display='none';homeForm(x,!x.last)}).catch(function(e){bx.innerHTML='<div class="err">'+esc(e.message)+'</div>';$('home').disabled=false})}
+function homeForm(x,edit){var bx=$('homeBox');if(x.wait){bx.innerHTML='<div class="err">已經改成宅配了，請重新整理</div>';return}if(!x.n){bx.innerHTML='<div class="err">目前沒有可以改宅配的訂單</div>';return}
+  var h='<div class="box" style="margin-top:10px;border:2px solid #cfe0ef"><b>🚚 改宅配</b><div style="margin-top:6px;line-height:1.8">'+esc(x.labs.join('、'))+'<br>'+(x.had?'待付 '+money(x.due)+'（已含宅配運費）':'待付 '+money(x.due)+' ＋ '+(x.free?'宅配<b>免運</b>':'宅配運費 '+money(x.fee)))+'<br>要匯款付清：<span class="due">'+money(x.pay)+'</span></div><div class="note" style="margin:6px 0">宅配需要先匯款付清，確認收到後才會寄出喔 🙏</div>';
+  if(x.last&&!edit)h+='<div class="sub" style="margin-top:8px">上次寄這裡：</div><div style="background:#f6f3ef;border-radius:8px;padding:8px 10px;line-height:1.7">'+esc(x.last.nm)+'　'+esc(x.last.ph)+'<br>'+esc(x.last.ad)+'</div><button class="main" id="hsame" style="margin-top:10px">✅ 一樣，寄這裡</button><button class="main" id="hedit" style="margin-top:8px;background:#e8e2da;color:#2a2622">✏️ 更換收件資料</button>';
+  else{var L=x.last||{};h+='<div class="sub" style="margin-top:8px">收件人姓名</div><input id="hn" maxlength="30" placeholder="例：王小明" value="'+esc(L.nm||'')+'"><div class="sub" style="margin-top:8px">手機號碼</div><input id="hp" type="tel" maxlength="12" placeholder="例：0912345678" value="'+esc(L.ph||'')+'"><div class="sub" style="margin-top:8px">地址（縣市、區、路、號、樓）</div><input id="ha" maxlength="120" placeholder="例：台北市中山區○○路 1 號 2 樓" value="'+esc(L.ad||'')+'"><button class="main" id="hok" style="margin-top:10px">確定改宅配</button>'}
+  h+='<button class="main" id="hno" style="margin-top:8px;background:#fff;color:#8a7f74;border:1px solid #e8e2da">先不要</button><div class="err" id="he"></div></div>';bx.innerHTML=h;
+  var go=function(n,p,a,btn){$('he').textContent='';btn.disabled=true;btn.textContent='送出中，約 20 秒，請不要關掉…';call('客_改宅配',[{n:n,p:p,a:a}]).then(function(r){D=r.me;try{localStorage.setItem('hokoriMe'+(asTest?'T':''),JSON.stringify(r.me))}catch(e){}show(r.me);window.scrollTo(0,0)}).catch(function(e){$('he').textContent=e.message;btn.disabled=false;btn.textContent='再送一次'})};
+  if($('hsame')){$('hsame').onclick=function(){go(x.last.nm,x.last.ph,x.last.ad,$('hsame'))};$('hedit').onclick=function(){homeForm(x,true)}}
+  if($('hok'))$('hok').onclick=function(){var n=$('hn').value.trim(),p=$('hp').value.trim(),a=$('ha').value.trim();if(!n||!p||!a){$('he').textContent='姓名、手機、地址都要填喔';return}go(n,p,a,$('hok'))};
+  $('hno').onclick=function(){bx.innerHTML='';$('home').style.display='';$('home').disabled=false}}
 /* 併下次：只列這個人可以併的批次＋併單規則 */
 function showHold(d){if(d.bind!=='已綁定')return show(d);$('hi').textContent='🔗 併單';$('at').textContent='等還沒到的下一批，一起寄';document.title='併單｜日本扭蛋代購';
   var c=(d.groups||[]).filter(function(g){return g.st!=='出貨'&&!g.mb&&!g.pre});var pre=(d.groups||[]).filter(function(g){return g.st!=='出貨'&&!g.mb&&g.pre});

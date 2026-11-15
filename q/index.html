@@ -73,7 +73,7 @@ details.box summary{font-weight:700;cursor:pointer}
 <div class="big" id="big"><img alt="商品大圖"></div>
 <script src="https://static.line-scdn.net/liff/edge/2/sdk.js"></script>
 <script>
-var API='https://script.google.com/macros/s/AKfycbygGbeKAk3etQFnk4Y6DoOULoOqVPF6q0Ct8mrrLlsaXZkvcOYFWjQP76Aqf2KIUC7mow/exec',LIFF='2012273722-4vfR8J73',SHOP='https:\/\/myship.7-11.com.tw\/cart\/easy\/GM2501160986854';
+var API='https://script.google.com/macros/s/AKfycbwbCxq0ZAKj0Gcgb1guRp7CB_xROFBnZfk0gfd4Bpd43muHsmx7HSk5dPLHwlqWxqXrqA/exec',LIFF='2012273722-4vfR8J73',SHOP='https:\/\/myship.7-11.com.tw\/cart\/easy\/GM2501160986854';
 var $=function(i){return document.getElementById(i)};
 function esc(t){return String(t==null?'':t).replace(/[&<>"]/g,function(c){return{'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]})}
 function money(n){return '$'+Number(n||0).toLocaleString()}
@@ -178,7 +178,7 @@ function loadF(){$('hi').textContent='📢 購前須知／常見問題';document
 /* 許願池 */
 function loadW(){$('hi').textContent='🌟 許願池';document.title='許願池｜日本扭蛋代購';$('at').textContent='想找什麼都可以許願，大家都看得到';$('m').innerHTML='<div class="empty">讀取中…</div>';call('客_許願清單').then(function(w){W=w;showW()}).catch(fail)}
 function showW(){var L=W.list||[];
-  var h='<div class="box"><b>🌟 想找什麼？許個願吧！</b><div class="sub">大家都看得到，也可以按「我也想要」。小幫手會依大家想要的程度去找喔</div>'+
+  var h='<div class="box"><b>🌟 想找什麼？許個願吧！</b><div class="sub">大家都看得到，也可以按「我也想要」。小幫手會依大家想要的程度去找喔</div><div class="sub" style="color:#c0392b;margin-top:6px">🙅 請不要許願扭蛋：確定最近會發售的扭蛋，直接在「扭蛋專用記事本」留言，我們看到就會扭；太久以前、已經找不到的就不要放囉</div>'+
     '<textarea id="wt" rows="2" placeholder="想要什麼？例：吉伊卡哇 聖誕兔吊飾 粉色"></textarea><input id="wl" placeholder="有連結可以貼這裡（可不填）"><input id="wp" type="file" accept="image/*"><button class="main" id="wgo">許願 🌟</button><div class="err" id="we"></div></div>';
   if(!L.length)h+='<div class="empty">還沒有人許願，當第一個吧！</div>';
   h+=L.map(function(w){return '<div class="wish"><div class="who">'+esc(w.name)+'・'+md(w.at)+(w.st&&w.st!=='許願中'?'<span class="st">小幫手：'+esc(w.st)+'</span>':'')+'</div>'+

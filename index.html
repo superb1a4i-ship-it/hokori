@@ -2091,7 +2091,7 @@ function qcard(o) {
     const rows = o.rows.map(r => {
         const img = r.pic ? `<img loading="lazy" src="${PH(r.pic, 120)}" data-big="${esc(r.pic)}" data-bn="${esc(r.n)}" style="cursor:zoom-in" alt="">` : r.dep || r.acct ? '<div class="ni" style="color:#7a7066">' + (r.dep ? "訂金" : "帳") + "</div>" : '<div class="ni">沒照片</div>';
         const unit = r.dep ? "" : r.f ? `($${r.p}＋運$${r.f}) × ${r.q} ＝ ${money(r.sub)}` : `$${r.p} × ${r.q} ＝ ${money(r.sub)}`;
-        return `<div class="oi">${img}<div class="t">${esc(r.n)}${r.dep ? "" : " ×" + r.q}${unit ? `<div class="u">${unit}</div>` : ""}${r.note ? `<div class="u">備註：${esc(r.note)}</div>` : ""}${r.rt ? `<div class="u" style="color:#8a5a00">↩ 上次${r.rt.sd ? " " + sdTxt(r.rt.sd) : ""}寄的那箱客人沒取、被退回，這次重寄：原本應付 ${money(r.rt.orig)}＋重寄費 ${money(r.rt.fee)}（重寄費＝運費＋包材＋人工，不賺錢）</div>` : ""}${r.kuji ? '<div class="u" style="color:#a32d2d">⚠ 國際運費未補</div>' : ""}</div><div class="s">${r.dep ? "−" + money(-r.sub) : money(r.sub)}</div></div>`;
+        return `<div class="oi">${img}<div class="t">${esc(r.n)}${r.gd ? `<span style="display:inline-block;margin-left:6px;padding:0 6px;border-radius:999px;background:#fdf0f5;color:#a03b6b;font-size:12px">🎰 ${esc(r.gd)} 扭</span>` : ""}${r.dep ? "" : " ×" + r.q}${unit ? `<div class="u">${unit}</div>` : ""}${r.note ? `<div class="u">備註：${esc(r.note)}</div>` : ""}${r.rt ? `<div class="u" style="color:#8a5a00">↩ 上次${r.rt.sd ? " " + sdTxt(r.rt.sd) : ""}寄的那箱客人沒取、被退回，這次重寄：原本應付 ${money(r.rt.orig)}＋重寄費 ${money(r.rt.fee)}（重寄費＝運費＋包材＋人工，不賺錢）</div>` : ""}${r.kuji ? '<div class="u" style="color:#a32d2d">⚠ 國際運費未補</div>' : ""}</div><div class="s">${r.dep ? "−" + money(-r.sub) : money(r.sub)}</div></div>`;
     }).join("");
     const left = o.rev - o.dep;
     const m2 = !o.goods ? `<span style="color:#7a7066">只有訂金 ${money(o.dep)}（還沒有商品）</span>` : o.dep > 0 ? `訂金 <b>−${money(o.dep)}</b>　剩 <b style="color:#a32d2d">${money(left)}</b>` : '<span style="color:#a32d2d">💵 未收訂金</span>';
@@ -2106,7 +2106,7 @@ function qrowsHtml(o) {
     return o.rows.map(r => {
         const img = r.pic ? `<img loading="lazy" src="${PH(r.pic, 120)}" data-big="${esc(r.pic)}" data-bn="${esc(r.n)}" style="cursor:zoom-in" alt="">` : r.dep || r.acct ? '<div class="ni" style="color:#7a7066">' + (r.dep ? "訂金" : "帳") + "</div>" : '<div class="ni">沒照片</div>';
         const unit = r.dep ? "" : r.f ? `($${r.p}＋運$${r.f}) × ${r.q} ＝ ${money(r.sub)}` : `$${r.p} × ${r.q} ＝ ${money(r.sub)}`;
-        return `<div class="oi">${img}<div class="t">${esc(r.n)}${r.dep ? "" : " ×" + r.q}${unit ? `<div class="u">${unit}</div>` : ""}${r.note ? `<div class="u">備註：${esc(r.note)}</div>` : ""}${r.rt ? `<div class="u" style="color:#8a5a00">↩ 上次${r.rt.sd ? " " + sdTxt(r.rt.sd) : ""}寄的那箱客人沒取、被退回，這次重寄：原本應付 ${money(r.rt.orig)}＋重寄費 ${money(r.rt.fee)}（重寄費＝運費＋包材＋人工，不賺錢）</div>` : ""}</div><div class="s">${r.dep ? "−" + money(-r.sub) : money(r.sub)}</div></div>`;
+        return `<div class="oi">${img}<div class="t">${esc(r.n)}${r.gd ? `<span style="display:inline-block;margin-left:6px;padding:0 6px;border-radius:999px;background:#fdf0f5;color:#a03b6b;font-size:12px">🎰 ${esc(r.gd)} 扭</span>` : ""}${r.dep ? "" : " ×" + r.q}${unit ? `<div class="u">${unit}</div>` : ""}${r.note ? `<div class="u">備註：${esc(r.note)}</div>` : ""}${r.rt ? `<div class="u" style="color:#8a5a00">↩ 上次${r.rt.sd ? " " + sdTxt(r.rt.sd) : ""}寄的那箱客人沒取、被退回，這次重寄：原本應付 ${money(r.rt.orig)}＋重寄費 ${money(r.rt.fee)}（重寄費＝運費＋包材＋人工，不賺錢）</div>` : ""}</div><div class="s">${r.dep ? "−" + money(-r.sub) : money(r.sub)}</div></div>`;
     }).join("");
 }
 

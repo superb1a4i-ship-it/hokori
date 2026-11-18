@@ -98,7 +98,7 @@ function grpHtml(g,i){
   var m='商品 '+money(g.rev);if(g.dep>0)m+='　已付訂金 '+money(g.dep);
   if(g.st==='待下單')m+=g.hold?'<br><span class="tag hold">🔗 已登記併單</span> 等下一批到再一起下單':'<br><span class="due">要下單 '+money(Math.max(0,g.rev-g.dep))+'</span>';
   else if(g.st==='待付款')m+='<br><span class="due">🚚 已改宅配，待匯款 '+money(Math.max(0,g.rev-g.dep))+'</span>';
-  else if(g.st==='等出貨'&&/^宅配/.test(g.mb||''))m+='<br><span class="ok">🚚 宅配已付清</span>，'+(D&&D.wk2?D.wk2:'通常週五寄出')+'，會寄到您家';
+  else if(g.st==='等出貨'&&/^宅配/.test(g.mb||''))m+='<br><span class="ok">🚚 宅配已付清</span>'; /* 妮妮 11/18：後面寄出時間不用寫 */
   else if(g.st==='等出貨')m+='<br><span class="ok">已下賣貨便</span>，'+(D&&D.wk2?D.wk2:'通常週五寄出，請留意簡訊')+'，到門市取貨付款';
   else if(g.st==='出貨')m+='<br><span class="ok">已寄出</span>';
   if(g.ship){var sp=g.ship,dd=sp.due?md(sp.due):'';

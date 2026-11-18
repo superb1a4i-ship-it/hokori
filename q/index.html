@@ -87,7 +87,7 @@ function addDays(k,n){var d=new Date(k+'T12:00:00+09:00');d.setDate(d.getDate()+
 function todayS(){var d=new Date(Date.now()+9*3600e3);return d.toISOString().slice(0,10)}
 function eta(g){
   if(g.st==='日本'){var d=new Date(Date.now()+9*3600e3),w=d.getUTCDay();d.setUTCDate(d.getUTCDate()+(w===0?0:7-w));var sd=(D&&D.ship)||d.toISOString().slice(0,10);return '預計 '+md(sd)+'（'+'日一二三四五六'[new Date(sd+'T12:00:00+09:00').getDay()]+'）送集運，送集運後約兩週內會通知下單'}
-  if(g.st==='集運'&&/^\d{4}-\d{2}-\d{2}$/.test(g.k)){var d=addDays(g.k,14);return d>=todayS()?'預計 '+md(d)+' 那週通知下單':'快到囉，整理好就會通知下單'}
+  if(g.st==='集運'&&/^\d{4}-\d{2}-\d{2}$/.test(g.k)){var d=addDays(g.k,14),w=new Date(d+'T12:00:00+09:00').getDay(),mon=addDays(d,w===0?-6:1-w);return d>=todayS()?'預計 '+md(mon)+'～'+md(addDays(mon,6))+' 那週通知下單':'快到囉，整理好就會通知下單'}
   if(g.st==='整理中')return '整理好就會通知下單';
   return ''}
 function tab(v){VIEW=v;if(v==='w')return loadW();if(v==='f')return loadF();if(v==='s')return loadS();var ck='hokoriMe'+(asTest?'T':''),old=null;try{old=JSON.parse(localStorage.getItem(ck)||'null')}catch(e){}
@@ -111,7 +111,7 @@ function grpHtml(g,i){
   var e=eta(g);if(e&&!g.hold)m+='<br>'+esc(e);
   return '<div class="grp'+(i<2&&g.st!=='出貨'?' open':'')+'"><div class="gh"><span class="lab">'+esc(g.lab)+'</span><span class="st">'+esc(g.t)+'</span></div><div class="money">'+m+'</div><div class="items">'+
     g.items.map(function(r){return '<div class="it">'+(r.pic?'<img loading="lazy" src="'+pic(r.pic)+'" data-big="'+esc(r.pic)+'" alt="">':'<div class="nopic">沒照片</div>')+
-      '<div class="n">'+esc(r.n)+(r.short?'<span class="tag short">還在確認</span>':'')+(r.kuji?'<span class="tag hold">⚖️ 國際運費還沒秤重</span>':'')+(r.wt?'<span class="tag" style="background:#eef3f8;color:#3b5b7a">⚖️ '+r.wt+'g 以下</span>':'')+'</div><div class="p">×'+r.q+'<br>'+money(r.sub)+'</div></div>'}).join('')+
+      '<div class="n">'+esc(r.n)+(r.gd?'<span class="tag" style="background:#fdf0f5;color:#a03b6b">🎰 '+esc(r.gd)+' 扭</span>':'')+(r.short?'<span class="tag short">還在確認</span>':'')+(r.kuji?'<span class="tag hold">⚖️ 國際運費還沒秤重</span>':'')+(r.wt?'<span class="tag" style="background:#eef3f8;color:#3b5b7a">⚖️ '+r.wt+'g 以下</span>':'')+(r.fees||[]).map(function(f){return '<div style="font-size:12px;color:#8a7f74;font-weight:400;margin-top:4px">└ '+esc(f.n)+' '+money(f.sub)+(f.note?'（'+esc(f.note)+'）':'')+'</div>'}).join('')/* 妮妮 11/18：換讓手續費接在那顆扭蛋下面 */+'</div><div class="p">×'+r.q+'<br>'+money(r.sub)+'</div></div>'}).join('')+
     (g.fees||[]).map(function(f){return '<div class="it"><div class="nopic">費用</div><div class="n">'+esc(/^金額調整[｜|]./.test(f.n)?f.n.replace(/^金額調整[｜|]\s*/,''):f.n)+(f.note&&!/^金額調整/.test(f.n)?'<div style="font-size:12px;color:#8a7f74;font-weight:400;margin-top:2px">'+esc(f.note)+'</div>':'')+'</div><div class="p">'+money(f.sub)+'</div></div>'}).join('')+'</div></div>'}
 var COLORS=['#d9822b','#3b82c4','#8e5bc7','#2f9e6a','#c2477a'];
 function show(d){

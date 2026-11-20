@@ -97,7 +97,7 @@ function tab(v){VIEW=v;if(v==='w')return loadW();if(v==='f')return loadF();if(v=
   if(old&&old.bind==='已綁定'){D=old;rend(v,old);$('at').textContent='更新中…（先顯示上次看到的）'}else $('m').innerHTML='<div class="empty">讀取中…</div>';
   call('客_我的').then(function(d){D=d;try{localStorage.setItem(ck,JSON.stringify(d))}catch(e){}if(VIEW!==v)return;rend(v,d)}).catch(function(x){if(old&&old.bind==='已綁定')$('at').textContent='更新失敗，顯示的是上次的資料';else fail(x)})}
 function grpHtml(g,i){
-  var m='商品 '+money(g.rev);if(g.dep>0)m+='　已付訂金 '+money(g.dep);
+  var m='商品 '+money(g.rev);if(g.dep>0)m+='　已付訂金 '+money(g.dep)+'　<b>尾款 '+money(Math.max(0,g.rev-g.dep))+'</b>'; /* 妮妮 11/21 */
   if(g.st==='待下單')m+=g.hold?'<br><span class="tag hold">🔗 已登記併單</span> 等下一批到再一起下單':'<br><span class="due">要下單 '+money(Math.max(0,g.rev-g.dep))+'</span>';
   else if(g.st==='待付款')m+='<br><span class="due">🚚 已改宅配，待匯款 '+money(Math.max(0,g.rev-g.dep))+'</span>';
   else if(g.st==='等出貨'&&/^宅配/.test(g.mb||''))m+='<br><span class="ok">🚚 宅配已付清</span>'; /* 妮妮 11/18：後面寄出時間不用寫 */
@@ -114,7 +114,7 @@ function grpHtml(g,i){
   return '<div class="grp'+(i<2&&g.st!=='出貨'?' open':'')+(g.pre&&(g.st==='日本'||g.st==='其他')?' pre':'')+'"><div class="gh"><span class="lab">'+esc(g.lab)+'</span><span class="st">'+esc(g.t)+'</span></div><div class="money">'+m+'</div><div class="items">'+
     g.items.map(function(r){return '<div class="it">'+(r.pic?'<img loading="lazy" src="'+pic(r.pic)+'" data-big="'+esc(r.pic)+'" alt="">':'<div class="nopic">沒照片</div>')+
       '<div class="n">'+esc(r.n)+(r.gd?'<span class="tag" style="background:#fdf0f5;color:#a03b6b">🎰 '+esc(r.gd)+' 扭</span>':'')+(r.short?'<span class="tag short">還在確認</span>':'')+(r.kuji?'<span class="tag hold">⚖️ 國際運費還沒秤重</span>':'')+(r.wt?'<span class="tag" style="background:#eef3f8;color:#3b5b7a">⚖️ '+r.wt+'g 以下</span>':'')+(r.fees||[]).map(function(f){return '<div style="font-size:12px;color:#8a7f74;font-weight:400;margin-top:4px">└ '+esc(f.n)+' '+money(f.sub)+(f.note?'（'+esc(f.note)+'）':'')+'</div>'}).join('')/* 妮妮 11/18：換讓手續費接在那顆扭蛋下面 */+'</div><div class="p">×'+r.q+'<br>'+money(r.sub)+'</div></div>'}).join('')+
-    (g.fees||[]).map(function(f){return '<div class="it"><div class="nopic">費用</div><div class="n">'+esc(/^金額調整[｜|]./.test(f.n)?f.n.replace(/^金額調整[｜|]\s*/,''):f.n)+(f.note&&!/^金額調整/.test(f.n)?'<div style="font-size:12px;color:#8a7f74;font-weight:400;margin-top:2px">'+esc(f.note)+'</div>':'')+'</div><div class="p">'+money(f.sub)+'</div></div>'}).join('')+'</div></div>'}
+    (g.fees||[]).map(function(f){return '<div class="it"><div class="nopic">費用</div><div class="n">'+esc(/^金額調整[｜|]./.test(f.n)?f.n.replace(/^金額調整[｜|]\s*/,''):f.n)+(f.note&&!/^金額調整/.test(f.n)?'<div style="font-size:12px;color:#8a7f74;font-weight:400;margin-top:2px">'+esc(f.note)+'</div>':'')+'</div><div class="p">'+money(f.sub)+'</div></div>'}).join('')+(g.deps||[]).map(function(x){return '<div class="it"><div class="nopic">訂金</div><div class="n">訂金'+(x.d?'（'+esc(x.d)+'）':'')+'</div><div class="p">−'+money(Math.abs(x.sub))+'</div></div>'}).join('')/* 妮妮 11/21：訂金一欄 */+'</div></div>'}
 var COLORS=['#d9822b','#3b82c4','#8e5bc7','#2f9e6a','#c2477a'];
 function show(d){
   $('at').textContent=d.at?('資料更新：'+lt(d.at)+'（有變動約 15 分鐘內更新）'):'';

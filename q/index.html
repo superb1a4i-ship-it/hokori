@@ -36,6 +36,7 @@ main{max-width:640px;margin:auto;padding:12px 12px 40px}
 .money .ok{color:var(--green);font-weight:700}
 .items{border-top:1px solid var(--line);display:none}
 .grp.open .items{display:block}
+.grp.pre{background:#f3eefc;border-color:#cdbdf0}.grp.pre .st{color:#6b4fb3}
 .it{display:flex;gap:10px;padding:10px 14px;border-bottom:1px solid #f4eee7;align-items:center}
 .it img,.it .nopic{width:64px;height:64px;border-radius:10px;object-fit:cover;flex:none;background:#f1ece5}
 .it .nopic{display:flex;align-items:center;justify-content:center;font-size:12px;color:var(--sub)}
@@ -86,6 +87,7 @@ function lt(s){if(!s||s.length<16)return s?md(s):'';var d=new Date(s.slice(0,10)
 function addDays(k,n){var d=new Date(k+'T12:00:00+09:00');d.setDate(d.getDate()+n);return d.toISOString().slice(0,10)}
 function todayS(){var d=new Date(Date.now()+9*3600e3);return d.toISOString().slice(0,10)}
 function eta(g){
+  if(g.pre&&(g.st==='日本'||g.st==='其他'))return g.pship?'預計 '+g.pship+' 出貨，到了會通知下單':'預購中，到貨時間會再通知'; /* 妮妮 11/21：預購不寫送集運日期 */
   if(g.st==='日本'){var d=new Date(Date.now()+9*3600e3),w=d.getUTCDay();d.setUTCDate(d.getUTCDate()+(w===0?0:7-w));var sd=(D&&D.ship)||d.toISOString().slice(0,10);return '預計 '+md(sd)+'（'+'日一二三四五六'[new Date(sd+'T12:00:00+09:00').getDay()]+'）送集運，送集運後約兩週內會通知下單'}
   if(g.st==='集運'&&/^\d{4}-\d{2}-\d{2}$/.test(g.k)){var d=addDays(g.k,14),w=new Date(d+'T12:00:00+09:00').getDay(),mon=addDays(d,w===0?-6:1-w);return d>=todayS()?'預計 '+md(mon)+'～'+md(addDays(mon,6))+' 那週通知下單':'快到囉，整理好就會通知下單'}
   if(g.st==='整理中')return '整理好就會通知下單';
@@ -109,7 +111,7 @@ function grpHtml(g,i){
     else if(sp.st==='退回')m+='<br><span class="due">↩️ 包裹已退回，請跟我們聯絡</span>'}
   if(g.kuji&&g.st!=='出貨')m+='<br><span class="note">⚖️ 一番賞的國際運費還沒秤重，秤好才能下單</span>';
   var e=eta(g);if(e&&!g.hold)m+='<br>'+esc(e);
-  return '<div class="grp'+(i<2&&g.st!=='出貨'?' open':'')+'"><div class="gh"><span class="lab">'+esc(g.lab)+'</span><span class="st">'+esc(g.t)+'</span></div><div class="money">'+m+'</div><div class="items">'+
+  return '<div class="grp'+(i<2&&g.st!=='出貨'?' open':'')+(g.pre&&(g.st==='日本'||g.st==='其他')?' pre':'')+'"><div class="gh"><span class="lab">'+esc(g.lab)+'</span><span class="st">'+esc(g.t)+'</span></div><div class="money">'+m+'</div><div class="items">'+
     g.items.map(function(r){return '<div class="it">'+(r.pic?'<img loading="lazy" src="'+pic(r.pic)+'" data-big="'+esc(r.pic)+'" alt="">':'<div class="nopic">沒照片</div>')+
       '<div class="n">'+esc(r.n)+(r.gd?'<span class="tag" style="background:#fdf0f5;color:#a03b6b">🎰 '+esc(r.gd)+' 扭</span>':'')+(r.short?'<span class="tag short">還在確認</span>':'')+(r.kuji?'<span class="tag hold">⚖️ 國際運費還沒秤重</span>':'')+(r.wt?'<span class="tag" style="background:#eef3f8;color:#3b5b7a">⚖️ '+r.wt+'g 以下</span>':'')+(r.fees||[]).map(function(f){return '<div style="font-size:12px;color:#8a7f74;font-weight:400;margin-top:4px">└ '+esc(f.n)+' '+money(f.sub)+(f.note?'（'+esc(f.note)+'）':'')+'</div>'}).join('')/* 妮妮 11/18：換讓手續費接在那顆扭蛋下面 */+'</div><div class="p">×'+r.q+'<br>'+money(r.sub)+'</div></div>'}).join('')+
     (g.fees||[]).map(function(f){return '<div class="it"><div class="nopic">費用</div><div class="n">'+esc(/^金額調整[｜|]./.test(f.n)?f.n.replace(/^金額調整[｜|]\s*/,''):f.n)+(f.note&&!/^金額調整/.test(f.n)?'<div style="font-size:12px;color:#8a7f74;font-weight:400;margin-top:2px">'+esc(f.note)+'</div>':'')+'</div><div class="p">'+money(f.sub)+'</div></div>'}).join('')+'</div></div>'}

@@ -97,7 +97,7 @@ function tab(v){VIEW=v;if(v==='w')return loadW();if(v==='f')return loadF();if(v=
   if(old&&old.bind==='已綁定'){D=old;rend(v,old);$('at').textContent='更新中…（先顯示上次看到的）'}else $('m').innerHTML='<div class="empty">讀取中…</div>';
   call('客_我的').then(function(d){D=d;try{localStorage.setItem(ck,JSON.stringify(d))}catch(e){}if(VIEW!==v)return;rend(v,d)}).catch(function(x){if(old&&old.bind==='已綁定')$('at').textContent='更新失敗，顯示的是上次的資料';else fail(x)})}
 function grpHtml(g,i){
-  var m='商品 '+money(g.rev);if(g.dep>0)m+='　已付訂金 '+money(g.dep)+'　<b>尾款 '+money(Math.max(0,g.rev-g.dep))+'</b>'; /* 妮妮 11/21 */
+  var fo=!g.items.length&&(g.fees||[]).length;var m=(fo?'手續費 ':'商品 ')+money(g.rev);if(g.dep>0)m+='　已付訂金 '+money(g.dep)+'　<b>尾款 '+money(Math.max(0,g.rev-g.dep))+'</b>'; /* 妮妮 11/21 */
   if(g.st==='待下單')m+=g.hold?'<br><span class="tag hold">🔗 已登記併單</span> 等下一批到再一起下單':'<br><span class="due">要下單 '+money(Math.max(0,g.rev-g.dep))+'</span>';
   else if(g.st==='待付款')m+='<br><span class="due">🚚 已改宅配，待匯款 '+money(Math.max(0,g.rev-g.dep))+'</span>';
   else if(g.st==='等出貨'&&/^宅配/.test(g.mb||''))m+='<br><span class="ok">🚚 宅配已付清</span>'; /* 妮妮 11/18：後面寄出時間不用寫 */
@@ -127,7 +127,7 @@ function show(d){
     $('m').innerHTML='<div class="box"><b>第一次使用，請告訴我們你是誰</b><div class="note" style="color:#8a4b2f;margin:4px 0">請先完成綁定，小幫手審核通過後才可以查詢訂單喔 🙏</div><div class="sub">社群暱稱：請打你在「日本扭蛋代購」社群裡<b>完整的暱稱</b>，表情符號也要打進去（只要填一次）</div><input id="nk" placeholder="例：小熊軟糖🧸" maxlength="40"><div class="sub" style="margin-top:8px">真實姓名</div><input id="rn" placeholder="例：王小明" maxlength="30"><div class="sub" style="margin-top:8px">手機號碼</div><input id="ph" type="tel" placeholder="例：0912345678" maxlength="12"><div class="sub" style="margin-top:8px">IG 或臉書（沒有的話填「沒有」）</div><input id="sn" placeholder="例：IG：hokori_xxx" maxlength="80"><div class="note" style="margin:6px 0">僅用於訂單聯繫與取貨問題</div><button class="main" id="go">送出</button><div class="err" id="e"></div></div>';
     $('go').onclick=function(){var v=$('nk').value.trim(),rn=$('rn').value.trim(),ph=$('ph').value.trim(),sn=$('sn').value.trim();if(!v||!rn||!ph||!sn){$('e').textContent='四格都要填喔（IG／臉書沒有的話填「沒有」）';return}$('go').disabled=true;call('客_申請',[v,{n:rn,p:ph,s:sn}]).then(function(x){D=x;show(x)}).catch(function(x){$('e').textContent=x.message;$('go').disabled=false})};return}
   $('hi').textContent=(d.show||'')+' 的訂單';
-  var gs=d.groups||[];
+  var gs=d.groups||[];{var isFo=function(g){return !(g.items||[]).length&&(g.fees||[]).length&&g.st!=='出貨'&&!g.mb};var fos=gs.filter(isFo);if(fos.length){var i0=gs.indexOf(fos[0]);var mg=Object.assign({},fos[0],{k:'手續費',lab:'手續費',t:'有新貨時一起收',rev:0,dep:0,fees:[],deps:[],items:[]});fos.forEach(function(g){mg.rev+=g.rev;mg.dep+=g.dep;mg.fees=mg.fees.concat(g.fees||[]);mg.deps=mg.deps.concat(g.deps||[])});gs=gs.filter(function(g){return !isFo(g)});gs.splice(i0,0,mg)}} /* 妮妮 11/21：只剩手續費的合成一張，不寫批次、在哪 */
   var hist=gs.filter(function(g){return g.st==='出貨'&&(!g.ship||g.ship.st==='已取件')});
   var act=gs.filter(function(g){return hist.indexOf(g)<0});
   var pend=act.filter(function(g){return g.st==='待下單'&&!g.mb});

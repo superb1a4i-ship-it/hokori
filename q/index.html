@@ -132,10 +132,12 @@ function show(d){
   var act=gs.filter(function(g){return hist.indexOf(g)<0});
   var pend=act.filter(function(g){return g.st==='待下單'&&!g.mb});
   var free=pend.filter(function(g){return !g.hold});
+  var od2=function(k){return k==='未送集運'?'9999':(/^\d{4}-/.test(k)?k:'9998')};var wn=act.filter(function(g){return ['待下單','出貨','等出貨','其他','待付款'].indexOf(g.st)<0&&!g.mb&&!g.pre}).sort(function(a,b){return od2(a.k)<od2(b.k)?-1:1})[0];
+  var wait=!free.length&&pend.some(function(g){return g.hold})&&wn; /* 妮妮 11/23：登記併單的，要等下一批全部到齊才能一起下，不能先下前面那批 */
   var h='<div class="note" style="color:#8a4b2f;background:#fdf1e7;border-radius:8px;padding:8px 10px;margin:0 0 10px;line-height:1.6">還沒收到下單通知前，請不要為了保留免運券提早下單 🙏<br>因作業流程為整批產出條碼，無法另外挑出還沒到貨的商品，提早下單造成賣貨便條碼過期，無法負責請見諒</div>';
   var hw=act.filter(function(g){return g.st==='待付款'});
   if(hw.length){var ha=hw.reduce(function(a,g){return a+Math.max(0,g.rev-g.dep)},0);h+='<div class="sum">🚚 已改宅配（'+esc(hw.map(function(g){return g.lab}).join('、'))+'）<br>宅配需要先付清尾款，請匯款：<b class="due">'+money(ha)+'</b></div><div class="box" style="line-height:1.7">'+(d.bankT?esc(d.bankT).replace(/\n/g,'<br>')+'<br><br>':'')+'<b>宅配需要先付清尾款後寄出</b><br>匯完請在官方賴傳<b>後五碼或截圖</b>給我們，謝謝<div class="note" style="margin-top:6px">要改收件資料或取消宅配，請聯絡小幫手</div></div>'}
-  if(pend.length){var amt=pend.reduce(function(a,g){return a+g.rev-g.dep},0);var fill=amt<20?20:amt,back=amt<20?20-amt:0;
+  if(pend.length&&!wait){var amt=pend.reduce(function(a,g){return a+g.rev-g.dep},0);var fill=amt<20?20:amt,back=amt<20?20-amt:0;
     h+='<div class="sum">🧾 這次要下單：<b>'+money(Math.max(amt,0))+'</b></div>'+(!free.length&&act.some(function(g){return g.st!=='待下單'&&g.st!=='出貨'&&g.st!=='等出貨'&&!g.mb&&!g.pre})?'<div class="note" style="margin:-4px 0 8px;color:#8a5a00">🔗 您有登記併單，下一批次還未到貨 📦 要先下的話，照下面的金額下單就好</div>':'');
     h+='<div class="order"><h3>🛒 這次要下的是：'+esc(pend.map(function(g){return g.lab}).join('、'))+'</h3>'+
       (d.wk?'<div class="note" style="margin:6px 0;color:#8a4b2f">📦 '+d.wk+'</div>':'')+'<div class="note" style="margin:6px 0">請照下面格式填寫，請注意填錯會找不到人 🙏</div>'+
@@ -145,7 +147,7 @@ function show(d){
       '<div class="ln"><span>🔢 數量：<b>1</b></span><button class="cp" data-cp="1">複製</button></div>'+
       '<div class="ln"><span>💵 金額：<b>'+fill+'</b></span><button class="cp" data-cp="'+fill+'">複製</button></div>'+
       '<button class="main" id="home" style="margin-top:12px;background:#eef3f8;color:#2a4a6a">🚚 改宅配（'+(pend.reduce(function(a,g){return a+g.rev},0)>8000?'這次免運':'運費 $80')+'）</button><div id="homeBox"></div></div>';}
-  else if(pend.length)h+='<div class="sum">🔗 您登記了併單，等下一批到了再一起下單 📦</div>';
+  else if(wait)h+='<div class="sum">🔗 您已登記併單，等 '+esc(wn.k==='未送集運'?'還在日本的那批':wn.lab)+' 到齊再下單</div>';
   else if(!hw.length)h+='<div class="sum">目前沒有要下單的 🙌</div>';
   if(!act.length)h+='<div class="empty">目前沒有進行中的訂單 🙌</div>';
   var mbs={},ci=0;act.forEach(function(g){if(g.mb){mbs[g.mb]=(mbs[g.mb]||0)+1}});

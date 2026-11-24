@@ -178,9 +178,10 @@ function showHold(d){if(d.bind!=='已綁定')return show(d);$('hi').textContent=
   var L=function(a){return esc(a.map(function(g){return g.lab}).join('＋'))};
   var h='<div class="box" style="font-size:15px"><b>📌 併單規則</b><div style="margin-top:6px;line-height:1.8">・最多併一次（累積兩批，寄出後歸零），約多等 1～2 週<br>・預購單無法併單<br>・<b>要併單請先不要下單，下單就會馬上出貨</b><br>・要併的批次超過 $300，並且還沒付過訂金，需要先結清才可以併單<br>・要下單請直接按「🛒 我要下單」，金額會自動合併</div></div>';
   if(pre.length)h+='<div class="note" style="margin:0 2px 8px">預購單不能併：'+L(pre)+'</div>';
-  if(now.length&&now.every(function(g){return g.hold})){h+='<div class="box"><b>✅ 已登記併單</b><div style="margin-top:8px;line-height:1.7">'+L(now)+(next?' ＋ '+esc(next.lab):'')+'<br>會等'+(next?esc(next.lab):'下一批')+'到了再一起寄，到時候會通知您下單 📦</div><button class="main" id="hcancel" style="margin-top:12px;background:#e8e2da;color:#2a2622">取消併單</button><div class="err" id="he"></div></div>';$('m').innerHTML=h;return}
+  var sold=(d.groups||[]).filter(function(g){return g.st!=='出貨'&&g.mb&&!g.pre});if(sold.length&&now.length)h+='<div class="note" style="margin:0 2px 8px">這批已下賣貨便，無法併單：'+L(sold)+'</div>';
+  if(now.length&&now.every(function(g){return g.hold})){h+='<div class="box"><b>✅ 已登記併單</b><div style="margin-top:8px;line-height:1.7">'+L(now)+(next?' ＋ '+esc(next.lab):'')+'<br>已成功登記併單，兩批次到齊後會通知您下單，請勿先行下單喔，謝謝 🙏</div><button class="main" id="hcancel" style="margin-top:12px;background:#e8e2da;color:#2a2622">取消併單</button><div class="err" id="he"></div></div>';$('m').innerHTML=h;return}
   if(now.some(function(g){return g.hold})){h+='<div class="empty">您已經併過一次了，等的那批也到台灣了 📦<br>已到的 '+L(now)+' 會一起下單，請直接按「🛒 我要下單」喔 🙏<br>（最多只能併一次）</div>';$('m').innerHTML=h;return}
-  if(!now.length){h+='<div class="empty">目前沒有已經到台灣的批次，不用併單喔 🙌</div>';$('m').innerHTML=h;return}
+  if(!now.length){h+='<div class="empty">'+(sold.length?'這批已下賣貨便，無法併單 🙏':'目前沒有已經到台灣的批次，不用併單喔 🙌')+'</div>';$('m').innerHTML=h;return}
   if(!next){h+='<div class="empty">已到台灣的 '+L(now)+' 會一起下單，<br>目前沒有還沒到的批次可以等，請直接下單喔 🙏</div>';$('m').innerHTML=h;return}
   h+='<div class="box"><b>要不要等下一批一起寄？</b><div style="margin-top:8px;line-height:1.8">✅ 已到台灣：<b>'+L(now)+'</b><br>⏳ 要等的：<b>'+esc(next.lab)+'</b>　'+esc(next.t)+'</div>'+
     '<div class="note" style="margin-top:6px">按下去後，'+esc(next.lab)+' 到台灣會通知您，到時候全部一起下單</div>'+

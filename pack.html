@@ -1,0 +1,58 @@
+<!doctype html>
+<html lang="zh-Hant">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>開團圖片</title>
+<style>
+:root{--bg:#fff7f2;--card:#fff;--ink:#3a2e2a;--sub:#8a7a72;--main:#e8735a;--line:#f0dfd6}
+@media (prefers-color-scheme:dark){:root{--bg:#1f1a18;--card:#2a2321;--ink:#f3e9e4;--sub:#b3a39b;--main:#f08c74;--line:#3d3330}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,"PingFang TC","Hiragino Sans",sans-serif;padding:16px 16px 40px}
+h1{font-size:20px;margin:4px 0 12px}
+.btn{display:block;width:100%;border:0;border-radius:14px;padding:16px;font-size:18px;font-weight:700;margin:0 0 10px;cursor:pointer}
+.main{background:var(--main);color:#fff}
+.sub{background:var(--card);color:var(--ink);border:1px solid var(--line)}
+.msg{font-size:14px;color:var(--sub);margin:6px 0 14px;min-height:1em}
+.imgs img{width:100%;display:block;border-radius:10px;margin:0 0 10px;background:var(--card)}
+pre{white-space:pre-wrap;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:12px;font:15px/1.6 inherit;font-family:inherit}
+</style>
+</head>
+<body>
+<h1 id="ttl">讀取中…</h1>
+<button class="btn main" id="save" disabled>全部存到相簿</button>
+<button class="btn sub" id="copy" disabled>複製文案</button>
+<div class="msg" id="msg"></div>
+<div class="imgs" id="imgs"></div>
+<pre id="txt" hidden></pre>
+<script>
+var API='https:\/\/script.google.com/macros/s/AKfycbwbCxq0ZAKj0Gcgb1guRp7CB_xROFBnZfk0gfd4Bpd43muHsmx7HSk5dPLHwlqWxqXrqA/exec';
+var $=function(id){return document.getElementById(id);};
+var files=[],text='';
+function msg(t){$('msg').textContent=t;}
+function toFile(g){var bin=atob(g.b),u=new Uint8Array(bin.length);for(var i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return new File([u],g.n,{type:g.m||'image/jpeg'});}
+var t=(location.search.match(/[?&]t=([0-9a-f]{40})/)||[])[1];
+if(!t){$('ttl').textContent='連結不完整';}
+else fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.stringify({fn:'開團頁_讀',t:t})})
+ .then(function(r){return r.json();})
+ .then(function(j){
+   if(j.err||!j.r||j.r.err){$('ttl').textContent=(j.r&&j.r.err)||j.err||'讀不到';return;}
+   var d=j.r;$('ttl').textContent=d.名稱+'（'+d.圖.length+' 張）';document.title=d.名稱;
+   d.圖.forEach(function(g){var im=new Image();im.src='data:'+(g.m||'image/jpeg')+';base64,'+g.b;im.alt=g.n;$('imgs').appendChild(im);files.push(toFile(g));});
+   text=d.文案||'';if(text){$('txt').textContent=text;$('txt').hidden=false;$('copy').disabled=false;}else $('copy').style.display='none';
+   $('save').textContent='全部存到相簿（'+files.length+' 張）';$('save').disabled=!files.length;
+   if(!(navigator.canShare&&navigator.canShare({files:files.slice(0,1)})))msg('這個瀏覽器不能一次存，請改用 Safari 打開；不行的話長按每張圖存。');
+ })
+ .catch(function(e){$('ttl').textContent='讀取失敗，請重新整理';msg(String(e));});
+$('save').onclick=function(){
+  if(!(navigator.canShare&&navigator.canShare({files:files}))){msg('這個瀏覽器不能一次存，請改用 Safari 打開；不行的話長按每張圖存。');return;}
+  navigator.share({files:files}).then(function(){msg('好了 ✓');}).catch(function(e){if(e&&e.name!=='AbortError')msg('沒存成功：'+e.message);});
+};
+$('copy').onclick=function(){
+  (navigator.clipboard?navigator.clipboard.writeText(text):Promise.reject()).then(function(){msg('文案已複製 ✓');})
+  .catch(function(){var r=document.createRange();r.selectNodeContents($('txt'));var s=getSelection();s.removeAllRanges();s.addRange(r);msg('已選取文案，按「拷貝」');});
+};
+</script>
+</body>
+</html>

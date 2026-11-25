@@ -96,9 +96,12 @@ function tab(v){VIEW=v;if(v==='w')return loadW();if(v==='f')return loadF();if(v=
   if(v==='b')old=null; /* 綁定頁一定要看最新的，不先顯示上次的 */
   if(old&&old.bind==='已綁定'){D=old;rend(v,old);$('at').textContent='更新中…（先顯示上次看到的）'}else $('m').innerHTML='<div class="empty">讀取中…</div>';
   call('客_我的').then(function(d){D=d;try{localStorage.setItem(ck,JSON.stringify(d))}catch(e){}if(VIEW!==v)return;rend(v,d)}).catch(function(x){if(old&&old.bind==='已綁定')$('at').textContent='更新失敗，顯示的是上次的資料';else fail(x)})}
+function 併伴(){var gs=(D&&D.groups)||[];var act=gs.filter(function(g){return !(g.st==='出貨'&&(!g.ship||g.ship.st==='已取件'))});var hold=act.filter(function(g){return g.st==='待下單'&&!g.mb&&g.hold});var od2=function(k){return k==='未送集運'?'9999':(/^\d{4}-/.test(k)?k:'9998')};var wn=act.filter(function(g){return ['待下單','出貨','等出貨','其他','待付款'].indexOf(g.st)<0&&!g.mb&&!g.pre}).sort(function(a,b){return od2(a.k)<od2(b.k)?-1:1})[0];return {hold:hold,wn:wn}} /* 妮妮 11/25：併單兩張卡都寫跟哪一批一起寄 */
 function grpHtml(g,i){
   var fo=!g.items.length&&(g.fees||[]).length;var m=(fo?'手續費 ':'商品 ')+money(g.rev);if(g.dep>0)m+='　已付訂金 '+money(g.dep)+'　<b>尾款 '+money(Math.max(0,g.rev-g.dep))+'</b>'; /* 妮妮 11/21 */
-  if(g.st==='待下單')m+=g.hold?'<br><span class="tag hold">🔗 已登記併單</span> 等下一批到再一起下單':'<br><span class="due">要下單 '+money(Math.max(0,g.rev-g.dep))+'</span>';
+  var PB=併伴();
+  if(g.st==='待下單')m+=g.hold?'<br><span class="tag hold">🔗 已登記併單</span> '+(PB.wn?'跟 '+esc(PB.wn.lab)+' 一起寄，等 '+esc(PB.wn.lab)+'到齊後會通知您一起下單，這段時間請先不要下單喔 🙏':'等下一批到再一起下單'):'<br><span class="due">要下單 '+money(Math.max(0,g.rev-g.dep))+'</span>';
+  else if(PB.hold.length&&PB.wn&&PB.wn.k===g.k)m+='<br><span class="tag hold">🔗 併單中</span> 這批會跟 '+esc(PB.hold.map(function(x){return x.lab}).join('、'))+' 一起寄，到齊後通知您下單 📦';
   else if(g.st==='待付款')m+='<br><span class="due">🚚 已改宅配，待匯款 '+money(Math.max(0,g.rev-g.dep))+'</span>';
   else if(g.st==='等出貨'&&/^宅配/.test(g.mb||''))m+='<br><span class="ok">🚚 宅配已付清</span>'; /* 妮妮 11/18：後面寄出時間不用寫 */
   else if(g.st==='等出貨')m+='<br><span class="ok">已下賣貨便</span>，'+(D&&D.wk2?D.wk2:'通常週五寄出，請留意簡訊')+'，到門市取貨付款';
@@ -179,7 +182,7 @@ function showHold(d){if(d.bind!=='已綁定')return show(d);$('hi').textContent=
   var h='<div class="box" style="font-size:15px"><b>📌 併單規則</b><div style="margin-top:6px;line-height:1.8">・最多併一次（累積兩批，寄出後歸零），約多等 1～2 週<br>・預購單無法併單<br>・<b>要併單請先不要下單，下單就會馬上出貨</b><br>・要併的批次超過 $300，並且還沒付過訂金，需要先結清才可以併單<br>・要下單請直接按「🛒 我要下單」，金額會自動合併</div></div>';
   if(pre.length)h+='<div class="note" style="margin:0 2px 8px">預購單不能併：'+L(pre)+'</div>';
   var sold=(d.groups||[]).filter(function(g){return g.st!=='出貨'&&g.mb&&!g.pre});if(sold.length&&now.length)h+='<div class="note" style="margin:0 2px 8px">這批已下賣貨便，無法併單：'+L(sold)+'</div>';
-  if(now.length&&now.every(function(g){return g.hold})){h+='<div class="box"><b>✅ 已登記併單</b><div style="margin-top:8px;line-height:1.7">'+L(now)+(next?' ＋ '+esc(next.lab):'')+'<br>已成功登記併單，兩批次到齊後會通知您下單，請勿先行下單喔，謝謝 🙏</div><button class="main" id="hcancel" style="margin-top:12px;background:#e8e2da;color:#2a2622">取消併單</button><div class="err" id="he"></div></div>';$('m').innerHTML=h;return}
+  if(now.length&&now.every(function(g){return g.hold})){h+='<div class="box"><b>✅ 已登記併單</b><div style="margin-top:8px;line-height:1.7">已經幫您登記併單囉 📦<br>'+L(now)+(next?' ＋ '+esc(next.lab)+' 一起寄，等 '+esc(next.lab)+'到齊會再通知您':' 一起寄，等下一批到齊會再通知您')+'，到時候再一起下單就好，這段時間請先不要下單喔，謝謝🙏</div><button class="main" id="hcancel" style="margin-top:12px;background:#e8e2da;color:#2a2622">取消併單</button><div class="err" id="he"></div></div>';$('m').innerHTML=h;return}
   if(now.some(function(g){return g.hold})){h+='<div class="empty">您已經併過一次了，等的那批也到台灣了 📦<br>已到的 '+L(now)+' 會一起下單，請直接按「🛒 我要下單」喔 🙏<br>（最多只能併一次）</div>';$('m').innerHTML=h;return}
   if(!now.length){h+='<div class="empty">'+(sold.length?'這批已下賣貨便，無法併單 🙏':'目前沒有已經到台灣的批次，不用併單喔 🙌')+'</div>';$('m').innerHTML=h;return}
   if(!next){h+='<div class="empty">已到台灣的 '+L(now)+' 會一起下單，<br>目前沒有還沒到的批次可以等，請直接下單喔 🙏</div>';$('m').innerHTML=h;return}

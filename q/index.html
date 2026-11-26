@@ -247,7 +247,7 @@ function fail(x){$('m').innerHTML='<div class="box err">'+esc(x.message||x)+'</d
   if(asTest){go();return}
   if(!window.liff||LIFF.indexOf('%')===0){fail('請從「日本扭蛋代購」官方賴下面的選單打開');return}
   try{var o0=JSON.parse(localStorage.getItem('hokoriMe')||'null');if(o0&&o0.bind==='已綁定'&&(start==='o'||start==='h')){D=o0;VIEW=start;start==='h'?showHold(o0):show(o0);$('at').textContent='更新中…（先顯示上次看到的）'}}catch(e){}
-  liff.init({liffId:LIFF}).then(function(){if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return}idt=liff.getIDToken();q=new URLSearchParams(location.search);pp=q.get('p');start=pp==='wish'?'w':pp==='hold'?'h':pp==='faq'?'f':pp==='bind'?'b':pp==='sale'?'s':'o';go()}).catch(fail)})();
+  liff.init({liffId:LIFF}).then(function(){if(!liff.isLoggedIn()){liff.login({redirectUri:location.href});return}idt=liff.getIDToken();q=new URLSearchParams(location.search);pp=q.get('p');if(pp==='sendtest'){$('hi').textContent='🧪 測試';liff.sendMessages([{type:'text',text:'🧪 測試：網頁替客人傳訊息成功'}]).then(function(){$('m').innerHTML='<div class="box">✅ 送出去了，回聊天室看看有沒有出現「🧪 測試：網頁替客人傳訊息成功」</div>'}).catch(function(e){$('m').innerHTML='<div class="box">❌ 送不出去：'+esc(String(e&&e.message||e))+'</div>'});return}start=pp==='wish'?'w':pp==='hold'?'h':pp==='faq'?'f':pp==='bind'?'b':pp==='sale'?'s':'o';go()}).catch(fail)})();
 </script>
 </body>
 </html>

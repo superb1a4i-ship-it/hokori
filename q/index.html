@@ -231,8 +231,8 @@ document.addEventListener('click',function(e){var t=e.target;
   if(t.className==='hk'){var on=document.querySelectorAll('.hk:checked');if(on.length>2){t.checked=false;alert('最多只能勾兩批（併一次）')}return}
   if(t.id==='hcancel'){if(!confirm('確定要取消併單嗎？'))return;t.disabled=true;call('客_取消併單',[]).then(function(r){alert(r.msg);D=r.me;showHold(D)}).catch(function(x){$('he').textContent=x.message;t.disabled=false});return}
   if(t.id==='dgo'){var dv=$('dd').value,wv=$('dw').value.trim();if(!dv){$('de').textContent='請選預計哪天前下單';return}if(!wv){$('de').textContent='請簡單寫一下原因';return}
-    t.disabled=true;call('客_延後',[dv,wv]).then(function(r){alert(r.msg);if(r.ok)告訴聊天室('✅ 已登記延後下單：'+md(r.d)+' 前下單｜原因：'+r.why);else if(r.settle)告訴聊天室('📝 延後下單：'+md(r.d)+' 前下單｜原因：'+r.why+'\n這邊需要先結清 $'+r.amt+(r.bank?'\n\n'+r.bank:''));D=r.me;showHold(D)}).catch(function(x){$('de').textContent=x.message;t.disabled=false});return}
-  if(t.id==='hgo'){t.disabled=true;call('客_併單',[]).then(function(r){alert(r.msg);if(r.ok&&r.labs)告訴聊天室('✅ 已登記併單：'+r.labs+' 一起寄');else if(r.settle&&r.labs)告訴聊天室('📝 併單：'+r.labs+'\n這邊需要先結清 $'+r.amt+(r.bank?'\n\n'+r.bank:''));D=r.me;showHold(D)}).catch(function(x){$('he').textContent=x.message;t.disabled=false});return}
+    t.disabled=true;call('客_延後',[dv,wv]).then(function(r){alert(r.msg);D=r.me;showHold(D)}).catch(function(x){$('de').textContent=x.message;t.disabled=false});return}
+  if(t.id==='hgo'){t.disabled=true;call('客_併單',[]).then(function(r){alert(r.msg);D=r.me;showHold(D)}).catch(function(x){$('he').textContent=x.message;t.disabled=false});return}
   var cp=t.getAttribute&&t.getAttribute('data-cp');if(cp!=null){(navigator.clipboard?navigator.clipboard.writeText(cp):Promise.reject()).then(function(){t.textContent='已複製 ✓'}).catch(function(){prompt('長按複製：',cp)});return}
   var wa=t.getAttribute&&t.getAttribute('data-want');if(wa){t.disabled=true;call('客_想要',[wa]).then(function(w){W=w;showW()}).catch(function(x){alert(x.message);t.disabled=false});return}
   var wd=t.getAttribute&&t.getAttribute('data-wdel');if(wd){if(!confirm('刪掉這個願望？'))return;call('客_刪願',[wd]).then(function(w){W=w;showW()}).catch(function(x){alert(x.message)});return}

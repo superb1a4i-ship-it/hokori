@@ -39,10 +39,16 @@ else fetch(API,{method:'POST',headers:{'Content-Type':'text/plain'},body:JSON.st
  .then(function(j){
    if(j.err||!j.r||j.r.err){$('ttl').textContent=(j.r&&j.r.err)||j.err||'讀不到';return;}
    var d=j.r;$('ttl').textContent=d.名稱+'（'+d.圖.length+' 張）';document.title=d.名稱;
-   d.圖.forEach(function(g){var im=new Image();im.src='data:'+(g.m||'image/jpeg')+';base64,'+g.b;im.alt=g.n;$('imgs').appendChild(im);files.push(toFile(g));});
+   var gs=d.圖,left=gs.length;files=new Array(gs.length);
+   gs.forEach(function(g,i){var im=new Image();im.alt=g.n;$('imgs').appendChild(im);
+     if(g.b){im.src='data:'+(g.m||'image/jpeg')+';base64,'+g.b;files[i]=toFile(g);if(!--left)ready();return}
+     var u='https:\/\/lh3.googleusercontent.com/d/'+g.id+'=s0';im.src=u;
+     fetch(u).then(function(r){return r.blob()}).then(function(b){files[i]=new File([b],g.n,{type:b.type||'image/jpeg'})}).catch(function(){}).then(function(){if(!--left)ready()});});
    text=d.文案||'';if(text){$('txt').textContent=text;$('txt').hidden=false;$('copy').disabled=false;}else $('copy').style.display='none';
-   $('save').textContent='全部存到相簿（'+files.length+' 張）';$('save').disabled=!files.length;
-   if(!(navigator.canShare&&navigator.canShare({files:files.slice(0,1)})))msg('這個瀏覽器不能一次存，請改用 Safari 打開；不行的話長按每張圖存。');
+   $('save').textContent='準備中…（'+gs.length+' 張）';
+   function ready(){files=files.filter(Boolean);$('save').textContent='全部存到相簿（'+files.length+' 張）';$('save').disabled=!files.length;
+     if(files.length<gs.length)msg('有 '+(gs.length-files.length)+' 張沒抓到，可以重新整理再試');
+     if(!(navigator.canShare&&files.length&&navigator.canShare({files:files.slice(0,1)})))msg('這個瀏覽器不能一次存，請改用 Safari 打開；不行的話長按每張圖存。');}
  })
  .catch(function(e){$('ttl').textContent='讀取失敗，請重新整理';msg(String(e));});
 $('save').onclick=function(){

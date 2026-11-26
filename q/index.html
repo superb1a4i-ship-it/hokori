@@ -126,7 +126,7 @@ function show(d){
     $('yes').onclick=function(){$('yes').disabled=true;call('客_是我').then(function(x){D=x;rend(VIEW,x)}).catch(function(x){$('e').textContent=x.message;$('yes').disabled=false})};
     $('no').onclick=function(){show({bind:'未綁定',name:d.name})};return}
   if(d.bind!=='已綁定'){$('hi').textContent='我的訂單';
-    if(d.bind==='待確認'){$('m').innerHTML='<div class="box"><b>✅ 已經收到您的綁定資料囉！</b><br>小幫手核對好之後（通常一天內），再按一次下面選單「📦 查我的訂單」就能看到您的訂單囉 🙏<br><span class="note">現在還看不到是正常的，不用再送一次喔</span></div>';return}
+    if(d.bind==='待確認'){$('m').innerHTML='<div class="box"><b>✅ 已經收到您的綁定資料囉！</b><br>小幫手核對好之後（通常一天內），再按一次下面選單「📦 我的訂單／下單」就能看到您的訂單囉 🙏<br><span class="note">現在還看不到是正常的，不用再送一次喔</span></div>';return}
     $('m').innerHTML='<div class="box"><b>第一次使用，請告訴我們你是誰</b><div class="note" style="color:#8a4b2f;margin:4px 0">請先完成綁定，小幫手審核通過後才可以查詢訂單喔 🙏</div><div class="sub">社群暱稱：請打你在「日本扭蛋代購」社群裡<b>完整的暱稱</b>，表情符號也要打進去（只要填一次）</div><input id="nk" placeholder="例：小熊軟糖🧸" maxlength="40"><div class="sub" style="margin-top:8px">真實姓名</div><input id="rn" placeholder="例：王小明" maxlength="30"><div class="sub" style="margin-top:8px">手機號碼</div><input id="ph" type="tel" placeholder="例：0912345678" maxlength="12"><div class="sub" style="margin-top:8px">IG 或臉書（沒有的話填「沒有」）</div><input id="sn" placeholder="例：IG：hokori_xxx" maxlength="80"><div class="note" style="margin:6px 0">僅用於訂單聯繫與取貨問題</div><button class="main" id="go">送出</button><div class="err" id="e"></div></div>';
     $('go').onclick=function(){var v=$('nk').value.trim(),rn=$('rn').value.trim(),ph=$('ph').value.trim(),sn=$('sn').value.trim();if(!v||!rn||!ph||!sn){$('e').textContent='四格都要填喔（IG／臉書沒有的話填「沒有」）';return}$('go').disabled=true;call('客_申請',[v,{n:rn,p:ph,s:sn}]).then(function(x){D=x;show(x)}).catch(function(x){$('e').textContent=x.message;$('go').disabled=false})};return}
   $('hi').textContent=(d.show||'')+' 的訂單';
@@ -138,6 +138,7 @@ function show(d){
   var od2=function(k){return k==='未送集運'?'9999':(/^\d{4}-/.test(k)?k:'9998')};var wn=act.filter(function(g){return ['待下單','出貨','等出貨','其他','待付款'].indexOf(g.st)<0&&!g.mb&&!g.pre}).sort(function(a,b){return od2(a.k)<od2(b.k)?-1:1})[0];
   var wait=!free.length&&pend.some(function(g){return g.hold})&&wn; /* 妮妮 11/23：登記併單的，要等下一批全部到齊才能一起下，不能先下前面那批 */
   var h='<div class="note" style="color:#8a4b2f;background:#fdf1e7;border-radius:8px;padding:8px 10px;margin:0 0 10px;line-height:1.6">還沒收到下單通知前，請不要為了保留免運券提早下單 🙏<br>因作業流程為整批產出條碼，無法另外挑出還沒到貨的商品，提早下單造成賣貨便條碼過期，無法負責請見諒</div>';
+  if(d.delay&&d.delay.d&&pend.length)h+='<div class="note" style="color:#6b5420;background:#F6EFDD;border-radius:10px;padding:10px 12px;margin:0 0 10px;line-height:1.7;font-size:14px">⏰ 已登記延後下單：<b>'+md(d.delay.d)+' 前下單</b>'+(d.delay.why?'<br>原因：'+esc(d.delay.why):'')+'</div>'; /* 妮妮 11/26 */
   var hw=act.filter(function(g){return g.st==='待付款'});
   if(hw.length){var ha=hw.reduce(function(a,g){return a+Math.max(0,g.rev-g.dep)},0);h+='<div class="sum">🚚 已改宅配（'+esc(hw.map(function(g){return g.lab}).join('、'))+'）<br>宅配需要先付清尾款，請匯款：<b class="due">'+money(ha)+'</b></div><div class="box" style="line-height:1.7">'+(d.bankT?esc(d.bankT).replace(/\n/g,'<br>')+'<br><br>':'')+'<b>宅配需要先付清尾款後寄出</b><br>匯完請在官方賴傳<b>後五碼或截圖</b>給我們，謝謝<div class="note" style="margin-top:6px">要改收件資料或取消宅配，請聯絡小幫手</div></div>'}
   if(pend.length&&!wait){var amt=pend.reduce(function(a,g){return a+g.rev-g.dep},0);var fill=amt<20?20:amt,back=amt<20?20-amt:0;
@@ -149,7 +150,7 @@ function show(d){
       '<div class="ln"><span>📝 商品名稱：<b>'+esc(d.c)+'</b></span><button class="cp" data-cp="'+esc(d.c)+'">複製</button></div>'+
       '<div class="ln"><span>🔢 數量：<b>1</b></span><button class="cp" data-cp="1">複製</button></div>'+
       '<div class="ln"><span>💵 金額：<b>'+fill+'</b></span><button class="cp" data-cp="'+fill+'">複製</button></div>'+
-      '<button class="main" id="home" style="margin-top:12px;background:#eef3f8;color:#2a4a6a">🚚 改宅配（'+(pend.reduce(function(a,g){return a+g.rev},0)>8000?'這次免運':'運費 $80')+'）</button><div id="homeBox"></div></div>';}
+      '<button class="main" id="home" style="margin-top:12px;background:#eef3f8;color:#2a4a6a">🚚 改宅配（'+(pend.some(function(g){return g.rev>=8000})?'這次免運':'運費 $80')+'）</button><div id="homeBox"></div></div>';}
   else if(wait)h+='<div class="sum">🔗 您已登記併單，等 '+esc(wn.k==='未送集運'?'還在日本的那批':wn.lab)+' 到齊再下單</div>';
   else if(!hw.length)h+='<div class="sum">目前沒有要下單的 🙌</div>';
   if(!act.length)h+='<div class="empty">目前沒有進行中的訂單 🙌</div>';
@@ -174,16 +175,25 @@ function homeForm(x,edit){var bx=$('homeBox');if(x.wait){bx.innerHTML='<div clas
   if($('hok'))$('hok').onclick=function(){var n=$('hn').value.trim(),p=$('hp').value.trim(),a=$('ha').value.trim();if(!n||!p||!a){$('he').textContent='姓名、手機、地址都要填喔';return}go(n,p,a,$('hok'))};
   $('hno').onclick=function(){bx.innerHTML='';$('home').style.display='';$('home').disabled=false}}
 /* 併下次：只列這個人可以併的批次＋併單規則 */
-function showHold(d){if(d.bind!=='已綁定')return show(d);$('hi').textContent='🔗 併單';$('at').textContent='等還沒到的下一批，一起寄';document.title='併單｜日本扭蛋代購';
+function showHold(d){showHold0(d);if(d.bind!=='已綁定')return;$('hi').textContent='🔗 併單／延後下單';$('at').textContent='等下一批一起寄，或晚點再下單';document.title='併單／延後下單｜日本扭蛋代購';$('m').insertAdjacentHTML('beforeend',delayBox(d));}
+/* 妮妮 11/26：延後下單（不主動宣傳，只放在這頁）：日期今天～14 天、原因一定要填；要先結清的跟併單一樣 */
+function delayBox(d){var pend=(d.groups||[]).filter(function(g){return g.st==='待下單'&&!g.mb});var h='<div class="box" style="border:2px solid #1F2B3D;margin-top:14px"><b style="font-size:16px">⏰ 延後下單</b>';
+  if(d.delay&&d.delay.d&&pend.length)return h+'<div style="margin-top:8px;line-height:1.7;color:#6b5420;background:#F6EFDD;border-radius:8px;padding:8px 10px">已登記延後下單：<b>'+md(d.delay.d)+' 前下單</b>'+(d.delay.why?'<br>原因：'+esc(d.delay.why):'')+'</div></div>';
+  if(d.delay&&d.delay.settle)return h+'<div style="margin-top:8px;line-height:1.7">已收到延後申請，請先結清 <b>'+money(d.delay.amt||0)+'</b>'+(d.delay.bank?'<div style="background:#f6f3ee;border-radius:8px;padding:8px 10px;margin:8px 0">'+esc(d.delay.bank).replace(/\n/g,'<br>')+'</div>':'')+'</div></div>';
+  if(!pend.length)return h+'<div class="note" style="margin-top:8px">目前沒有要下單的批次，不用延後喔</div></div>';
+  return h+'<div class="note" style="margin:4px 0 8px">最多延後 14 天</div><div>預計哪天前下單</div><input id="dd" type="date" min="'+esc(d.today||'')+'" max="'+esc(d.dmax||'')+'" style="width:100%;margin:4px 0 10px">'+
+    '<div>原因（簡述）</div><input id="dw" maxlength="60" placeholder="例：出國到 12/5" style="width:100%;margin:4px 0 10px"><button class="main" id="dgo" style="background:#1F2B3D;color:#E8D7A8">送出延後</button><div class="err" id="de"></div></div>';}
+function 告訴聊天室(t){try{if(window.liff&&liff.isInClient&&liff.isInClient()&&liff.sendMessages)liff.sendMessages([{type:'text',text:t}]).catch(function(){});}catch(e){}} /* 妮妮 11/26：登記完從客人那邊送一則到聊天室，妮妮也看得到 */
+function showHold0(d){if(d.bind!=='已綁定')return show(d);$('hi').textContent='🔗 併單';$('at').textContent='等還沒到的下一批，一起寄';document.title='併單｜日本扭蛋代購';
   var c=(d.groups||[]).filter(function(g){return g.st!=='出貨'&&!g.mb&&!g.pre});var pre=(d.groups||[]).filter(function(g){return g.st!=='出貨'&&!g.mb&&g.pre});
   var od=function(k){return k==='未送集運'?'9999':(/^\d{4}-/.test(k)?k:'9998')};var by=function(a,b){return od(a.k)<od(b.k)?-1:1};
   var now=c.filter(function(g){return g.st==='待下單'}).sort(by),next=c.filter(function(g){return g.st!=='待下單'}).sort(by)[0];if(next&&next.k==='未送集運')next=Object.assign({},next,{lab:'還在日本的那批'});
   var L=function(a){return esc(a.map(function(g){return g.lab}).join('＋'))};
-  var h='<div class="box" style="font-size:15px"><b>📌 併單規則</b><div style="margin-top:6px;line-height:1.8">・最多併一次（累積兩批，寄出後歸零），約多等 1～2 週<br>・預購單無法併單<br>・<b>要併單請先不要下單，下單就會馬上出貨</b><br>・要併的批次超過 $300，並且還沒付過訂金，需要先結清才可以併單<br>・要下單請直接按「🛒 我要下單」，金額會自動合併</div></div>';
+  var h='<div class="box" style="font-size:15px"><b>📌 併單規則</b><div style="margin-top:6px;line-height:1.8">・最多併一次（累積兩批，寄出後歸零），約多等 1～2 週<br>・預購單無法併單<br>・<b>要併單請先不要下單，下單就會馬上出貨</b><br>・要併的批次超過 $300，並且還沒付過訂金，需要先結清才可以併單<br>・要下單請直接在「📦 我的訂單／下單」下單，金額會自動合併</div></div>';
   if(pre.length)h+='<div class="note" style="margin:0 2px 8px">預購單不能併：'+L(pre)+'</div>';
   var sold=(d.groups||[]).filter(function(g){return g.st!=='出貨'&&g.mb&&!g.pre});if(sold.length&&now.length)h+='<div class="note" style="margin:0 2px 8px">這批已下賣貨便，無法併單：'+L(sold)+'</div>';
   if(now.length&&now.every(function(g){return g.hold})){h+='<div class="box"><b>✅ 已登記併單</b><div style="margin-top:8px;line-height:1.7">已經幫您登記併單囉 📦<br>'+L(now)+(next?' ＋ '+esc(next.lab)+' 一起寄，等 '+esc(next.lab)+'到齊會再通知您':' 一起寄，等下一批到齊會再通知您')+'，到時候再一起下單就好，這段時間請先不要下單喔，謝謝🙏</div><button class="main" id="hcancel" style="margin-top:12px;background:#e8e2da;color:#2a2622">取消併單</button><div class="err" id="he"></div></div>';$('m').innerHTML=h;return}
-  if(now.some(function(g){return g.hold})){h+='<div class="empty">您已經併過一次了，等的那批也到台灣了 📦<br>已到的 '+L(now)+' 會一起下單，請直接按「🛒 我要下單」喔 🙏<br>（最多只能併一次）</div>';$('m').innerHTML=h;return}
+  if(now.some(function(g){return g.hold})){h+='<div class="empty">您已經併過一次了，等的那批也到台灣了 📦<br>已到的 '+L(now)+' 會一起下單，請直接照上面「這次要下的是」下單喔 🙏<br>（最多只能併一次）</div>';$('m').innerHTML=h;return}
   if(!now.length){h+='<div class="empty">'+(sold.length?'這批已下賣貨便，無法併單 🙏':'目前沒有已經到台灣的批次，不用併單喔 🙌')+'</div>';$('m').innerHTML=h;return}
   if(!next){h+='<div class="empty">已到台灣的 '+L(now)+' 會一起下單，<br>目前沒有還沒到的批次可以等，請直接下單喔 🙏</div>';$('m').innerHTML=h;return}
   h+='<div class="box"><b>要不要等下一批一起寄？</b><div style="margin-top:8px;line-height:1.8">✅ 已到台灣：<b>'+L(now)+'</b><br>⏳ 要等的：<b>'+esc(next.lab)+'</b>　'+esc(next.t)+'</div>'+
@@ -195,7 +205,7 @@ function rend(v,d){v==='h'?showHold(d):v==='b'?showBind(d):show(d)}
 function loadS(){$('hi').textContent='🛍️ 出清區';document.title='出清區｜日本扭蛋代購';$('at').textContent='';$('m').innerHTML='<div class="box" style="text-align:center;padding:28px 16px"><div style="font-size:40px">🛍️</div><b style="font-size:17px">出清區還在準備中</b><div class="note" style="margin-top:8px;line-height:1.7">之後現貨、出清商品會放在這裡，<br>按進來就能直接搶 🙌<br>上線時會在社群通知，敬請期待！</div></div>'}
 /* 綁定帳號 */
 function showBind(d){if(d.bind!=='已綁定'){show(d);$('hi').textContent='🔗 綁定帳號';return}
-  $('hi').textContent='🔗 綁定帳號';$('at').textContent='';$('m').innerHTML='<div class="box"><b>✅ 已經綁定好囉</b><div style="margin-top:8px;line-height:1.7">社群暱稱：<b>'+esc(d.show||d.c)+'</b><br>按下面選單「📦 查我的訂單」就能看訂單、貨態；「🛒 我要下單」會告訴您這次要下多少。</div><div class="note" style="margin-top:8px">名字不對的話，請直接傳訊息給小幫手喔</div></div>'}
+  $('hi').textContent='🔗 綁定帳號';$('at').textContent='';$('m').innerHTML='<div class="box"><b>✅ 已經綁定好囉</b><div style="margin-top:8px;line-height:1.7">社群暱稱：<b>'+esc(d.show||d.c)+'</b><br>按下面選單「📦 我的訂單／下單」就能看訂單、貨態，到貨後也是在這裡下單。</div><div class="note" style="margin-top:8px">名字不對的話，請直接傳訊息給小幫手喔</div></div>'}
 /* 購前須知／常見問題：一題一行，點開才看答案 */
 function lk(h){return h.replace(/https?:\/\/[^\s<"]+/g,function(u){return '<a href="'+u.replace(/&amp;/g,'&')+'" target="_blank" rel="noopener" style="color:#c2477a;font-weight:600">點我打開 🔗</a>'})} /* 妮妮 11/15：網址直接可以按 */
 function loadF(){$('hi').textContent='📢 購前須知／常見問題';document.title='購前須知／常見問題｜日本扭蛋代購';$('at').textContent='點題目看答案';$('m').innerHTML='<div class="empty">讀取中…</div>';
@@ -220,7 +230,9 @@ function shrink(f){return new Promise(function(ok,bad){var r=new FileReader();r.
 document.addEventListener('click',function(e){var t=e.target;
   if(t.className==='hk'){var on=document.querySelectorAll('.hk:checked');if(on.length>2){t.checked=false;alert('最多只能勾兩批（併一次）')}return}
   if(t.id==='hcancel'){if(!confirm('確定要取消併單嗎？'))return;t.disabled=true;call('客_取消併單',[]).then(function(r){alert(r.msg);D=r.me;showHold(D)}).catch(function(x){$('he').textContent=x.message;t.disabled=false});return}
-  if(t.id==='hgo'){t.disabled=true;call('客_併單',[]).then(function(r){alert(r.msg);D=r.me;showHold(D)}).catch(function(x){$('he').textContent=x.message;t.disabled=false});return}
+  if(t.id==='dgo'){var dv=$('dd').value,wv=$('dw').value.trim();if(!dv){$('de').textContent='請選預計哪天前下單';return}if(!wv){$('de').textContent='請簡單寫一下原因';return}
+    t.disabled=true;call('客_延後',[dv,wv]).then(function(r){alert(r.msg);if(r.ok)告訴聊天室('✅ 已登記延後下單：'+md(r.d)+' 前下單｜原因：'+r.why);else if(r.settle)告訴聊天室('📝 延後下單：'+md(r.d)+' 前下單｜原因：'+r.why+'\n這邊需要先結清 $'+r.amt+(r.bank?'\n\n'+r.bank:''));D=r.me;showHold(D)}).catch(function(x){$('de').textContent=x.message;t.disabled=false});return}
+  if(t.id==='hgo'){t.disabled=true;call('客_併單',[]).then(function(r){alert(r.msg);if(r.ok&&r.labs)告訴聊天室('✅ 已登記併單：'+r.labs+' 一起寄');else if(r.settle&&r.labs)告訴聊天室('📝 併單：'+r.labs+'\n這邊需要先結清 $'+r.amt+(r.bank?'\n\n'+r.bank:''));D=r.me;showHold(D)}).catch(function(x){$('he').textContent=x.message;t.disabled=false});return}
   var cp=t.getAttribute&&t.getAttribute('data-cp');if(cp!=null){(navigator.clipboard?navigator.clipboard.writeText(cp):Promise.reject()).then(function(){t.textContent='已複製 ✓'}).catch(function(){prompt('長按複製：',cp)});return}
   var wa=t.getAttribute&&t.getAttribute('data-want');if(wa){t.disabled=true;call('客_想要',[wa]).then(function(w){W=w;showW()}).catch(function(x){alert(x.message);t.disabled=false});return}
   var wd=t.getAttribute&&t.getAttribute('data-wdel');if(wd){if(!confirm('刪掉這個願望？'))return;call('客_刪願',[wd]).then(function(w){W=w;showW()}).catch(function(x){alert(x.message)});return}
